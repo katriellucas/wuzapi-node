@@ -73,3 +73,8 @@ export interface UserPresenceRequest {
 export interface UserPresenceResponse {
   Details: string;
 }
+
+export interface UserLidResponse {
+  LID: string;
+  Phone: string;
+}

@@ -5,6 +5,8 @@ import {
   CreateUserRequest,
   CreateUserResponse,
   DeleteUserResponse,
+  UpdateUserRequest,
+  UpdateUserResponse,
 } from "../types/admin.js";
 
 export class AdminModule extends BaseClient {
@@ -16,6 +18,13 @@ export class AdminModule extends BaseClient {
   }
 
   /**
+   * Get a user by ID
+   */
+  async getUser(id: string, options?: RequestOptions): Promise<User> {
+    return this.get<User>(`/admin/users/${id}`, options);
+  }
+
+  /**
    * Add a new user
    */
   async addUser(
@@ -23,6 +32,17 @@ export class AdminModule extends BaseClient {
     options?: RequestOptions
   ): Promise<CreateUserResponse> {
     return this.post<CreateUserResponse>("/admin/users", user, options);
+  }
+
+  /**
+   * Update/edit a user by ID
+   */
+  async updateUser(
+    id: string,
+    user: UpdateUserRequest,
+    options?: RequestOptions
+  ): Promise<UpdateUserResponse> {
+    return this.put<UpdateUserResponse>(`/admin/users/${id}`, user, options);
   }
 
   /**

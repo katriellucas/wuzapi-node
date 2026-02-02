@@ -25,6 +25,10 @@ import {
   EditMessageRequest,
   ListSection,
   GetChatHistoryResponse,
+  RequestUnavailableMessageRequest,
+  RequestUnavailableMessageResponse,
+  ArchiveChatRequest,
+  ArchiveChatResponse,
 } from "../types/chat.js";
 
 export class ChatModule extends BaseClient {
@@ -330,6 +334,53 @@ export class ChatModule extends BaseClient {
 
     return this.get<GetChatHistoryResponse>(
       `/chat/history?${queryParams.join("&")}`,
+      options
+    );
+  }
+
+  /**
+   * Request a copy of a message that couldn't be decrypted
+   */
+  async requestUnavailableMessage(
+    chat: string,
+    sender: string,
+    messageId: string,
+    options?: RequestOptions
+  ): Promise<RequestUnavailableMessageResponse> {
+    const request: RequestUnavailableMessageRequest = {
+      chat,
+      sender,
+      id: messageId,
+    };
+    return this.post<RequestUnavailableMessageResponse>(
+      "/chat/request-unavailable-message",
+      request,
+      options
+    );
+  }
+
+  /**
+   * Archive or unarchive a chat
+   */
+  async archiveChat(
+    jid: string,
+    archive: boolean,
+    options?: RequestOptions
+  ): Promise<ArchiveChatResponse> {
+    const request: ArchiveChatRequest = { jid, archive };
+    return this.post<ArchiveChatResponse>("/chat/archive", request, options);
+  }
+
+  /**
+   * Download a sticker from a message
+   */
+  async downloadSticker(
+    request: DownloadMediaRequest,
+    options?: RequestOptions
+  ): Promise<DownloadMediaResponse> {
+    return this.post<DownloadMediaResponse>(
+      "/chat/downloadsticker",
+      request,
       options
     );
   }

@@ -10,6 +10,7 @@ import {
   ContactsResponse,
   UserPresenceRequest,
   UserPresenceResponse,
+  UserLidResponse,
 } from "../types/user.js";
 
 export class UserModule extends BaseClient {
@@ -63,5 +64,15 @@ export class UserModule extends BaseClient {
   ): Promise<UserPresenceResponse> {
     const request: UserPresenceRequest = { type: presenceType };
     return this.post<UserPresenceResponse>("/user/presence", request, options);
+  }
+
+  /**
+   * Get LID (Linked ID) from phone number or JID
+   */
+  async getLid(
+    phone: string,
+    options?: RequestOptions
+  ): Promise<UserLidResponse> {
+    return this.get<UserLidResponse>(`/user/lid/${encodeURIComponent(phone)}`, options);
   }
 }

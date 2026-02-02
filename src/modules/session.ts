@@ -14,6 +14,9 @@ import {
   ProxyResponse,
   HistoryCountRequest,
   HistoryCountResponse,
+  HmacConfigRequest,
+  HmacConfigResponse,
+  HmacDeleteResponse,
 } from "../types/session.js";
 import { S3Config, RequestOptions, S3ConfigResponse } from "../types/common.js";
 
@@ -134,5 +137,30 @@ export class SessionModule extends BaseClient {
   ): Promise<ProxyResponse> {
     const request: ProxyRequest = { proxy_url: proxyURL, enable: enable };
     return this.post<ProxyResponse>("/session/proxy", request, options);
+  }
+
+  /**
+   * Configure HMAC key for webhook signing
+   */
+  async configureHmac(
+    hmacKey: string,
+    options?: RequestOptions
+  ): Promise<HmacConfigResponse> {
+    const request: HmacConfigRequest = { hmac_key: hmacKey };
+    return this.post<HmacConfigResponse>("/session/hmac/config", request, options);
+  }
+
+  /**
+   * Get HMAC configuration status
+   */
+  async getHmacConfig(options?: RequestOptions): Promise<HmacConfigResponse> {
+    return this.get<HmacConfigResponse>("/session/hmac/config", options);
+  }
+
+  /**
+   * Delete HMAC configuration
+   */
+  async deleteHmacConfig(options?: RequestOptions): Promise<HmacDeleteResponse> {
+    return this.delete<HmacDeleteResponse>("/session/hmac/config", options);
   }
 }

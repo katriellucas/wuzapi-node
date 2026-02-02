@@ -199,3 +199,22 @@ export interface HistoryMessage {
 }
 
 export type GetChatHistoryResponse = HistoryMessage[];
+
+export interface RequestUnavailableMessageRequest {
+  chat: string;
+  sender: string;
+  id: string;
+}
+
+export interface RequestUnavailableMessageResponse {
+  Details: string;
+}
+
+export interface ArchiveChatRequest {
+  jid: string;
+  archive: boolean;
+}
+
+export interface ArchiveChatResponse {
+  Details: string;
+}

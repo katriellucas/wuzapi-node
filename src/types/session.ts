@@ -80,3 +80,16 @@ export interface HistoryCountResponse {
   Details: string;
   History: number;
 }
+
+export interface HmacConfigRequest {
+  hmac_key: string;
+}
+
+export interface HmacConfigResponse {
+  Details: string;
+  configured?: boolean;
+}
+
+export interface HmacDeleteResponse {
+  Details: string;
+}

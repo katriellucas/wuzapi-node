@@ -11,6 +11,8 @@ A comprehensive TypeScript client library for the [WuzAPI WhatsApp API](https://
 - 📦 **Tree Shakable** - Import only what you need
 - 🔧 **Easy Configuration** - Simple setup with minimal configuration
 - 📖 **Well Documented** - Extensive documentation and examples
+- 📞 **Call Management** - Reject incoming calls
+- 📝 **Status Updates** - Set WhatsApp status text
 
 ## 📦 Installation
 
@@ -351,6 +353,19 @@ await client.session.testS3();
 await client.session.deleteS3Config();
 ```
 
+### HMAC Configuration
+
+```typescript
+// Configure HMAC key for webhook signing (minimum 32 characters)
+await client.session.configureHmac("your_hmac_key_minimum_32_characters_long");
+
+// Get HMAC configuration status
+const hmacConfig = await client.session.getHmacConfig();
+
+// Delete HMAC configuration
+await client.session.deleteHmacConfig();
+```
+
 </details>
 
 <details>
@@ -533,14 +548,40 @@ await client.chat.sendContact({
 ### Media Download
 
 ```typescript
-// Download media
-const media = await client.chat.downloadImage({
+// Download image
+const image = await client.chat.downloadImage({
   Url: "https://mmg.whatsapp.net/d/f/...",
   MediaKey: "media-key...",
   Mimetype: "image/jpeg",
   FileSHA256: "file-hash...",
   FileLength: 2039,
 });
+
+// Download sticker
+const sticker = await client.chat.downloadSticker({
+  Url: "https://mmg.whatsapp.net/d/f/...",
+  MediaKey: "media-key...",
+  Mimetype: "image/webp",
+  FileSHA256: "file-hash...",
+  FileLength: 1024,
+});
+```
+
+### Chat Management
+
+```typescript
+// Archive a chat
+await client.chat.archiveChat("5491155554444@s.whatsapp.net", true);
+
+// Unarchive a chat
+await client.chat.archiveChat("5491155554444@s.whatsapp.net", false);
+
+// Request unavailable message (for messages that couldn't be decrypted)
+await client.chat.requestUnavailableMessage(
+  "5491155554444@s.whatsapp.net",  // chat JID
+  "5491155554444@s.whatsapp.net",  // sender JID
+  "ABCD1234"                        // message ID
+);
 ```
 
 </details>
@@ -563,6 +604,10 @@ const contacts = await client.user.getContacts();
 
 // Send user presence (online/offline status)
 await client.user.sendPresence("available"); // or "unavailable"
+
+// Get LID (Linked ID) from phone number
+const lid = await client.user.getLid("5491155554444");
+console.log("LID:", lid.LID);
 ```
 
 </details>
@@ -657,6 +702,9 @@ await client.group.updateParticipants(
 // List all users
 const users = await client.admin.listUsers({ token: "admin-token" });
 
+// Get a specific user by ID
+const user = await client.admin.getUser("user-id-string", { token: "admin-token" });
+
 // Add new user
 const newUser = await client.admin.addUser(
   {
@@ -686,6 +734,18 @@ const newUser = await client.admin.addUser(
 
 // Delete user by ID (ID is a string)
 await client.admin.deleteUser("user-id-string", { token: "admin-token" });
+
+// Update/edit a user
+await client.admin.updateUser(
+  "user-id-string",
+  {
+    name: "Updated Name",
+    webhook: "https://new-webhook.com/webhook",
+    events: "Message,ReadReceipt",
+    history: 100,
+  },
+  { token: "admin-token" }
+);
 
 // Delete user completely (full deletion including all data)
 await client.admin.deleteUserComplete("user-id-string", {
@@ -912,6 +972,29 @@ newsletters.Newsletters.forEach((newsletter) => {
   console.log(`Handle: ${newsletter.Handle}`);
   console.log(`State: ${newsletter.State}`);
 });
+```
+
+</details>
+
+<details>
+<summary><strong>📝 Status Module</strong> - WhatsApp status updates</summary>
+
+```typescript
+// Set status text message
+await client.status.setStatusText("Hello from WuzAPI! 🎉");
+```
+
+</details>
+
+<details>
+<summary><strong>📞 Call Module</strong> - Call management</summary>
+
+```typescript
+// Reject an incoming call
+await client.call.rejectCall(
+  "5491155554444",  // call_from: phone number of caller
+  "CALL_ID_12345"   // call_id: unique call identifier from webhook
+);
 ```
 
 </details>
@@ -1362,17 +1445,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 📊 Changelog
 
-### Latest Updates
-
-- ✅ **Chat History**: Added chat history new endpoint
-- ✅ **Phone Pairing**: Alternative to QR code login
-- ✅ **Interactive Messages**: Buttons, lists, and polls
-- ✅ **Message Management**: Edit and delete messages
-- ✅ **Advanced Groups**: Full participant management
-- ✅ **Newsletter Support**: Business newsletter features
-- ✅ **Enhanced Webhooks**: Update and delete webhook configs
-- ✅ **Proxy Support**: Configure proxy for connections
-- ✅ **History Sync**: Request message history after login
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
 ---
 

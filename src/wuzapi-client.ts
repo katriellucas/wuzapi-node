@@ -6,6 +6,8 @@ import { ChatModule } from "./modules/chat.js";
 import { GroupModule } from "./modules/group.js";
 import { WebhookModule } from "./modules/webhook.js";
 import { NewsletterModule } from "./modules/newsletter.js";
+import { StatusModule } from "./modules/status.js";
+import { CallModule } from "./modules/call.js";
 
 export class WuzapiClient {
   public readonly admin: AdminModule;
@@ -15,6 +17,8 @@ export class WuzapiClient {
   public readonly group: GroupModule;
   public readonly webhook: WebhookModule;
   public readonly newsletter: NewsletterModule;
+  public readonly status: StatusModule;
+  public readonly call: CallModule;
 
   // Legacy aliases for convenience
   public readonly users: UserModule;
@@ -29,6 +33,8 @@ export class WuzapiClient {
     this.group = new GroupModule(config);
     this.webhook = new WebhookModule(config);
     this.newsletter = new NewsletterModule(config);
+    this.status = new StatusModule(config);
+    this.call = new CallModule(config);
 
     // Legacy aliases
     this.users = this.user;
