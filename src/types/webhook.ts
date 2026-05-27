@@ -29,6 +29,7 @@ export enum WebhookEventType {
   PAIR_ERROR = "PairError",
   QR = "QR",
   QR_SCANNED_WITHOUT_MULTIDEVICE = "QRScannedWithoutMultidevice",
+  QR_TIMEOUT = "QRTimeout",
   PRIVACY_SETTINGS = "PrivacySettings",
   PUSH_NAME_SETTING = "PushNameSetting",
   USER_ABOUT = "UserAbout",
@@ -476,6 +477,13 @@ export interface QRWebhookEvent {
   // The actual QR code data is in qrCodeBase64 at the payload level
 }
 
+// QRTimeout webhook event data (based on observed webhook payload)
+// Fired when the QR code scan window expires without being scanned
+export interface QRTimeoutWebhookEvent {
+  // The event field contains just the string "timeout"
+  // No additional data is provided beyond the timeout indication
+}
+
 // Connected webhook event data (based on observed webhook payload)
 // Note: For Connected events, the event field is an empty object {}
 export interface ConnectedWebhookEvent {
@@ -630,6 +638,8 @@ export interface MessageWebhookEvent {
 export type QRWebhookPayload = AnyWebhookPayload<QRWebhookEvent> & {
   qrCodeBase64: string; // QR code as base64 data URL
 };
+export type QRTimeoutWebhookPayload =
+  AnyWebhookPayload<QRTimeoutWebhookEvent>;
 export type ConnectedWebhookPayload = AnyWebhookPayload<ConnectedWebhookEvent>;
 export type ReadReceiptWebhookPayload =
   AnyWebhookPayload<ReadReceiptWebhookEvent>;
@@ -640,6 +650,7 @@ export type MessageWebhookPayload = AnyWebhookPayload<MessageWebhookEvent>;
 // Webhook event mapping types for type-safe handling
 export interface WebhookEventMap {
   QR: QRWebhookEvent;
+  QRTimeout: QRTimeoutWebhookEvent;
   Connected: ConnectedWebhookEvent;
   ReadReceipt: ReadReceiptWebhookEvent;
   HistorySync: HistorySyncWebhookEvent;
@@ -655,6 +666,7 @@ export type WebhookEventHandler<T extends keyof WebhookEventMap> = (
 // Union type for all specific webhook payloads
 export type SpecificWebhookPayload =
   | QRWebhookPayload
+  | QRTimeoutWebhookPayload
   | ConnectedWebhookPayload
   | ReadReceiptWebhookPayload
   | HistorySyncWebhookPayload

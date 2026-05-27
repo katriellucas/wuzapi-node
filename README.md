@@ -797,7 +797,7 @@ await client.webhook.setWebhook("https://my-server.com/webhook", [
 
 ### 📋 Complete Webhook Events List
 
-WuzAPI supports **45 different webhook events**. Here's the complete list:
+WuzAPI supports **46 different webhook events**. Here's the complete list:
 
 #### 🔧 **Connection & Session Events**
 
@@ -819,6 +819,7 @@ WebhookEventType.STREAM_REPLACED; // "StreamReplaced"
 ```typescript
 WebhookEventType.QR; // "QR"
 WebhookEventType.QR_SCANNED_WITHOUT_MULTIDEVICE; // "QRScannedWithoutMultidevice"
+WebhookEventType.QR_TIMEOUT; // "QRTimeout"
 WebhookEventType.PAIR_SUCCESS; // "PairSuccess"
 WebhookEventType.PAIR_ERROR; // "PairError"
 ```
