@@ -83,7 +83,7 @@ export interface SendContactRequest {
 export interface ChatPresenceRequest {
   Phone: string;
   State: "composing" | "paused";
-  Media?: string;
+  Media?: "audio";
 }
 
 export interface MarkReadRequest {

@@ -17,10 +17,16 @@ A comprehensive TypeScript client library for the [WuzAPI WhatsApp API](https://
 ## 📦 Installation
 
 ```bash
+bun add wuzapi
+```
+
+or with npm
+
+```bash
 npm install wuzapi
 ```
 
-or
+or with Yarn
 
 ```bash
 yarn add wuzapi
@@ -499,7 +505,13 @@ await client.chat.markRead({
 await client.chat.sendPresence({
   Phone: "5491155554444",
   State: "composing", // or "paused"
-  Media: "text",
+});
+
+// Send chat presence (recording indicator)
+await client.chat.sendPresence({
+  Phone: "5491155554444",
+  State: "composing",
+  Media: "audio",
 });
 ```
 
@@ -1423,13 +1435,16 @@ git clone https://github.com/gusnips/wuzapi-node.git
 cd wuzapi
 
 # Install dependencies
-npm install
+bun install
 
 # Run linter
-npm run lint
+bun run lint
+
+# Run type checker
+bun run typecheck
 
 # Build the project
-npm run build
+bun run build
 ```
 
 ## 📄 License
