@@ -478,8 +478,8 @@ await client.chat.sendPoll(
 ### Message Management
 
 ```typescript
-// Delete a message
-await client.chat.deleteMessage("message-id-to-delete");
+// Delete a message (revoke for everyone)
+await client.chat.deleteMessage("message-id-to-delete", "5491155554444");
 
 // Edit a message
 await client.chat.editMessage(

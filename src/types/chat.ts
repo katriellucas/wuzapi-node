@@ -119,6 +119,7 @@ export interface DownloadMediaResponse {
 }
 
 export interface DeleteMessageRequest {
+  Phone: string;
   Id: string;
 }
 

@@ -229,13 +229,15 @@ export class ChatModule extends BaseClient {
   }
 
   /**
-   * Delete a message
+   * Delete (revoke for everyone) a message you sent.
+   * Phone is the chat JID/number the message belongs to — required by the server.
    */
   async deleteMessage(
     messageId: string,
+    phone: string,
     options?: RequestOptions
   ): Promise<DeleteMessageResponse> {
-    const request: DeleteMessageRequest = { Id: messageId };
+    const request: DeleteMessageRequest = { Phone: phone, Id: messageId };
     return this.post<DeleteMessageResponse>("/chat/delete", request, options);
   }
 
