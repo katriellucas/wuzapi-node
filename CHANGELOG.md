@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-06-07
+
+### Added
+
+- **System Module** (`client.system`)
+  - `getHealth()` - Retrieve API health and service statistics
+- **User Module** (`client.user`)
+  - `blockUser(request)` - Block a WhatsApp user
+  - `unblockUser(request)` - Unblock a WhatsApp user
+  - `getBlocklist()` - Get the current blocklist
+  - `getPrivacy()` and `setPrivacy()` methods to User module for managing WhatsApp privacy settings
+- **Group Module** (`client.group`)
+  - `getRequestParticipants(groupJID)` - List pending join requests
+  - `updateRequestParticipants(groupJID, action, phones)` - Approve or reject pending join requests
+  - `setJoinApprovalMode(groupJID, mode)` - Enable or disable group join approval mode
+
 ## [1.9.3] - 2026-06-05
 
 ### Fixed

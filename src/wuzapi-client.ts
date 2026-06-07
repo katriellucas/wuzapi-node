@@ -8,6 +8,7 @@ import { WebhookModule } from "./modules/webhook.js";
 import { NewsletterModule } from "./modules/newsletter.js";
 import { StatusModule } from "./modules/status.js";
 import { CallModule } from "./modules/call.js";
+import { SystemModule } from "./modules/system.js";
 
 export class WuzapiClient {
   public readonly admin: AdminModule;
@@ -19,6 +20,7 @@ export class WuzapiClient {
   public readonly newsletter: NewsletterModule;
   public readonly status: StatusModule;
   public readonly call: CallModule;
+  public readonly system: SystemModule;
 
   // Legacy aliases for convenience
   public readonly users: UserModule;
@@ -35,6 +37,7 @@ export class WuzapiClient {
     this.newsletter = new NewsletterModule(config);
     this.status = new StatusModule(config);
     this.call = new CallModule(config);
+    this.system = new SystemModule(config);
 
     // Legacy aliases
     this.users = this.user;

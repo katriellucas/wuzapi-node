@@ -17,6 +17,7 @@ export { WebhookModule } from "./modules/webhook.js";
 export { NewsletterModule } from "./modules/newsletter.js";
 export { StatusModule } from "./modules/status.js";
 export { CallModule } from "./modules/call.js";
+export { SystemModule } from "./modules/system.js";
 
 // Default export
 export { WuzapiClient as default } from "./wuzapi-client.js";

@@ -620,6 +620,20 @@ await client.user.sendPresence("available"); // or "unavailable"
 // Get LID (Linked ID) from phone number
 const lid = await client.user.getLid("5491155554444");
 console.log("LID:", lid.LID);
+
+// Get user privacy settings
+const privacy = await client.user.getPrivacy();
+console.log("Privacy:", privacy);
+
+// Set user privacy setting
+await client.user.setPrivacy("last", "contacts");
+
+// Block and Unblock Users
+await client.user.blockUser({ Phone: "5491155554444" });
+await client.user.unblockUser({ Phone: "5491155554444" });
+
+// Get Blocklist
+const blocklist = await client.user.getBlocklist();
 ```
 
 </details>
@@ -703,6 +717,18 @@ await client.group.updateParticipants(
   "add", // "add", "remove", "promote", "demote"
   ["5491155553936", "5491155553937"]
 );
+
+// Group Join Requests & Approval Mode
+await client.group.setJoinApprovalMode("120362023605733675@g.us", true);
+
+const requests = await client.group.getRequestParticipants("120362023605733675@g.us");
+
+// Approve or reject join requests
+await client.group.updateRequestParticipants(
+  "120362023605733675@g.us",
+  "approve", // "approve" or "reject"
+  ["5491155553936"]
+);
 ```
 
 </details>
@@ -763,6 +789,19 @@ await client.admin.updateUser(
 await client.admin.deleteUserComplete("user-id-string", {
   token: "admin-token",
 });
+```
+
+</details>
+
+<details>
+<summary><strong>🏥 System Module</strong> - System statistics and health</summary>
+
+```typescript
+// Get system health and statistics
+const health = await client.system.getHealth();
+console.log("Status:", health.status);
+console.log("Memory usage:", health.memory_stats);
+console.log("Active connections:", health.active_connections);
 ```
 
 </details>

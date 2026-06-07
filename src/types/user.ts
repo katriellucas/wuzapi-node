@@ -78,3 +78,52 @@ export interface UserLidResponse {
   LID: string;
   Phone: string;
 }
+
+export interface UserPrivacySettings {
+  GroupAdd?: string;
+  LastSeen?: string;
+  Status?: string;
+  Profile?: string;
+  ReadReceipts?: string;
+  CallAdd?: string;
+  Online?: string;
+  Messages?: string;
+  Defense?: string;
+  Stickers?: string;
+}
+
+export interface PrivacySettingValueMap {
+  groupadd: "all" | "contacts" | "contact_blacklist" | "none";
+  last: "all" | "contacts" | "contact_blacklist" | "none";
+  status: "all" | "contacts" | "contact_blacklist" | "none";
+  profile: "all" | "contacts" | "contact_blacklist" | "none";
+  readreceipts: "all" | "none";
+  online: "all" | "match_last_seen";
+  calladd: "all" | "known";
+}
+
+export type UserPrivacyRequest = {
+  [K in keyof PrivacySettingValueMap]: {
+    Name: K;
+    Value: PrivacySettingValueMap[K];
+  };
+}[keyof PrivacySettingValueMap];
+
+export interface UserBlockRequest {
+  Phone?: string;
+  JID?: string;
+}
+
+export interface UserBlockResponse {
+  Details: string;
+  JID: string;
+  Blocklist: string[];
+  DHash: string;
+}
+
+export type UserUnblockResponse = UserBlockResponse;
+
+export interface UserBlocklistResponse {
+  Blocklist: string[];
+  DHash: string;
+}

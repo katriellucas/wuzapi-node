@@ -173,3 +173,29 @@ export interface ParticipantUpdate {
 export interface GroupUpdateParticipantsResponse {
   Updates: ParticipantUpdate[];
 }
+
+export interface GroupRequestParticipant {
+  JID: string;
+  RequestedAt: string;
+}
+
+export type GroupRequestParticipantsResponse = GroupRequestParticipant[];
+
+export interface UpdateGroupRequestParticipantsRequest {
+  GroupJID: string;
+  Action: "approve" | "reject";
+  Phone: string[];
+}
+
+export interface UpdateGroupRequestParticipantsResponse {
+  Details: string;
+}
+
+export interface SetGroupJoinApprovalModeRequest {
+  groupjid: string;
+  mode: boolean;
+}
+
+export interface SetGroupJoinApprovalModeResponse {
+  Details: string;
+}

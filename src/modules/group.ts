@@ -28,6 +28,11 @@ import {
   GroupInviteInfoResponse,
   GroupUpdateParticipantsRequest,
   GroupUpdateParticipantsResponse,
+  GroupRequestParticipantsResponse,
+  UpdateGroupRequestParticipantsRequest,
+  UpdateGroupRequestParticipantsResponse,
+  SetGroupJoinApprovalModeRequest,
+  SetGroupJoinApprovalModeResponse,
 } from "../types/group.js";
 
 export class GroupModule extends BaseClient {
@@ -233,6 +238,60 @@ export class GroupModule extends BaseClient {
     };
     return this.post<GroupUpdateParticipantsResponse>(
       "/group/updateparticipants",
+      request,
+      options
+    );
+  }
+
+  /**
+   * List participants who have requested to join the group
+   */
+  async getRequestParticipants(
+    groupJID: string,
+    options?: RequestOptions
+  ): Promise<GroupRequestParticipantsResponse> {
+    const params = `groupJID=${encodeURIComponent(groupJID)}`;
+    return this.get<GroupRequestParticipantsResponse>(
+      `/group/requestparticipants?${params}`,
+      options
+    );
+  }
+
+  /**
+   * Approve or reject pending join requests
+   */
+  async updateRequestParticipants(
+    groupJID: string,
+    action: "approve" | "reject",
+    phones: string[],
+    options?: RequestOptions
+  ): Promise<UpdateGroupRequestParticipantsResponse> {
+    const request: UpdateGroupRequestParticipantsRequest = {
+      GroupJID: groupJID,
+      Action: action,
+      Phone: phones,
+    };
+    return this.post<UpdateGroupRequestParticipantsResponse>(
+      "/group/updaterequestparticipants",
+      request,
+      options
+    );
+  }
+
+  /**
+   * Enable or disable group join approval mode
+   */
+  async setJoinApprovalMode(
+    groupJID: string,
+    mode: boolean,
+    options?: RequestOptions
+  ): Promise<SetGroupJoinApprovalModeResponse> {
+    const request: SetGroupJoinApprovalModeRequest = {
+      groupjid: groupJID,
+      mode: mode,
+    };
+    return this.post<SetGroupJoinApprovalModeResponse>(
+      "/group/joinapprovalmode",
       request,
       options
     );

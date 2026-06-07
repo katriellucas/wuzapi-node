@@ -11,6 +11,12 @@ import {
   UserPresenceRequest,
   UserPresenceResponse,
   UserLidResponse,
+  UserPrivacySettings,
+  PrivacySettingValueMap,
+  UserBlockRequest,
+  UserBlockResponse,
+  UserUnblockResponse,
+  UserBlocklistResponse,
 } from "../types/user.js";
 
 export class UserModule extends BaseClient {
@@ -74,5 +80,51 @@ export class UserModule extends BaseClient {
     options?: RequestOptions
   ): Promise<UserLidResponse> {
     return this.get<UserLidResponse>(`/user/lid/${encodeURIComponent(phone)}`, options);
+  }
+
+  /**
+   * Get user privacy settings
+   */
+  async getPrivacy(options?: RequestOptions): Promise<UserPrivacySettings> {
+    return this.get<UserPrivacySettings>("/user/privacy", options);
+  }
+
+  /**
+   * Set a user privacy setting
+   */
+  async setPrivacy<K extends keyof PrivacySettingValueMap>(
+    name: K,
+    value: PrivacySettingValueMap[K],
+    options?: RequestOptions
+  ): Promise<Partial<UserPrivacySettings>> {
+    const request = { Name: name, Value: value };
+    return this.post<Partial<UserPrivacySettings>>("/user/privacy", request, options);
+  }
+
+  /**
+   * Block a WhatsApp user
+   */
+  async blockUser(
+    request: UserBlockRequest,
+    options?: RequestOptions
+  ): Promise<UserBlockResponse> {
+    return this.post<UserBlockResponse>("/user/block", request, options);
+  }
+
+  /**
+   * Unblock a WhatsApp user
+   */
+  async unblockUser(
+    request: UserBlockRequest,
+    options?: RequestOptions
+  ): Promise<UserUnblockResponse> {
+    return this.post<UserUnblockResponse>("/user/unblock", request, options);
+  }
+
+  /**
+   * Get the current blocklist
+   */
+  async getBlocklist(options?: RequestOptions): Promise<UserBlocklistResponse> {
+    return this.get<UserBlocklistResponse>("/user/blocklist", options);
   }
 }
