@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+// 📁 src/client.ts
 import {
   WuzapiConfig,
   WuzapiResponse,
@@ -19,7 +19,6 @@ export class WuzapiError extends Error {
 }
 
 export class BaseClient {
-  protected axios: AxiosInstance;
   protected config: WuzapiConfig;
   protected defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
@@ -27,41 +26,14 @@ export class BaseClient {
 
   constructor(config: WuzapiConfig) {
     this.config = config;
-    this.axios = axios.create({
-      baseURL: config.apiUrl,
-      headers: this.defaultHeaders,
-    });
-
-    // Add response interceptor for error handling
-    this.axios.interceptors.response.use(
-      (response: AxiosResponse) => response,
-      (error) => {
-        if (error.response) {
-          // Server responded with error status
-          const data = error.response.data;
-          throw new WuzapiError(
-            data.code || error.response.status,
-            data.message || error.message,
-            data
-          );
-        } else if (error.request) {
-          // Request was made but no response received
-          throw new WuzapiError(0, "Network error: No response from server");
-        } else {
-          // Something else happened
-          throw new WuzapiError(0, error.message);
-        }
-      }
-    );
   }
 
   /**
-   * Resolve the token from request options or instance config
-   * Throws an error if no token is available
+   * Resolve headers with authentication token
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
     const token = options?.token || this.config.token;
-    const headers = {
+    const headers: Record<string, string> = {
       ...this.defaultHeaders,
     };
     if (!token) {
@@ -75,6 +47,7 @@ export class BaseClient {
     }
     if (this.config.token) {
       headers.Authorization = this.config.token;
+      headers.Token = this.config.token;
     }
     return headers;
   }
@@ -86,41 +59,44 @@ export class BaseClient {
     options?: RequestOptions
   ): Promise<T> {
     const headers = this.buildHeaders(options);
+    const url = `${this.config.apiUrl}${endpoint}`;
+
     if (this.config.debug) {
       logger.request(`[${method}] ${endpoint}`, { headers, data });
     }
 
-    const response = await this.axios.request<WuzapiResponse<T>>({
-      method,
-      url: endpoint,
-      data,
-      headers,
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
+      });
+    } catch (err: any) {
+      throw new WuzapiError(
+        0,
+        `Network error: ${err.message || "Failed to connect to WuzAPI"}`
+      );
+    }
+
+    const json: WuzapiResponse<T> = await res.json().catch(() => ({} as any));
 
     if (this.config.debug) {
       logger.response(`[${method}] ${endpoint}`, {
-        status: response.status,
-        data: response.data,
+        status: res.status,
+        data: json,
       });
     }
 
-    if (!response.data.success) {
+    if (!res.ok || json.success === false) {
       throw new WuzapiError(
-        response.data.code,
-        "API request failed",
-        response.data
+        json.code || res.status,
+        json.error || `API request failed with status ${res.status}`,
+        json
       );
     }
 
-    if (response.data.code <= 200 && response.data.code >= 300) {
-      throw new WuzapiError(
-        response.data.code,
-        response.data.error || "API request failed",
-        response.data
-      );
-    }
-
-    return response.data.data;
+    return json.data;
   }
 
   protected async get<T>(
