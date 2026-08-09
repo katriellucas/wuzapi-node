@@ -11,6 +11,14 @@ export default [
         ecmaVersion: 2020,
         sourceType: "module",
       },
+      globals: {
+        fetch: "readonly",
+        Response: "readonly",
+        Request: "readonly",
+        Headers: "readonly",
+        process: "readonly",
+        console: "readonly",
+      },
     },
     plugins: {
       "@typescript-eslint": typescript,
@@ -18,6 +26,7 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...typescript.configs.recommended.rules,
+      "no-undef": "off", // TypeScript's compiler handles global type checks
       "@typescript-eslint/no-unused-vars": "error",
       "@typescript-eslint/explicit-function-return-type": "warn",
       "@typescript-eslint/no-explicit-any": "warn",

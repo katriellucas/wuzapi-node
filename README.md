@@ -1401,18 +1401,18 @@ try {
 <summary><strong>🔧 Custom Configuration</strong></summary>
 
 ```typescript
-// Custom axios configuration
-import { BaseClient } from "wuzapi";
+// Custom client extending BaseClient
+import { BaseClient, RequestOptions } from "wuzapi";
 
 class CustomClient extends BaseClient {
-  constructor(config) {
-    super(config);
-
-    // Add custom interceptors
-    this.axios.interceptors.request.use((config) => {
-      console.log("Making request:", config.url);
-      return config;
-    });
+  protected override async requestRaw<T>(
+    method: "GET" | "POST" | "DELETE" | "PUT",
+    endpoint: string,
+    data?: unknown,
+    options?: RequestOptions
+  ): Promise<T> {
+    console.log(`[Request] ${method} ${endpoint}`);
+    return super.requestRaw<T>(method, endpoint, data, options);
   }
 }
 ```

@@ -1,4 +1,3 @@
-// 📁 src/client.ts
 import {
   WuzapiConfig,
   WuzapiResponse,
@@ -33,26 +32,24 @@ export class BaseClient {
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
     const token = options?.token || this.config.token;
-    const headers: Record<string, string> = {
-      ...this.defaultHeaders,
-    };
     if (!token) {
       throw new WuzapiError(
         401,
         "No authentication token provided. Either set a token in the client config or provide one in the request options."
       );
     }
-    if (options?.token && options.token !== this.config.token) {
-      headers.Token = options.token;
-    }
-    if (this.config.token) {
-      headers.Authorization = this.config.token;
-      headers.Token = this.config.token;
-    }
-    return headers;
+    return {
+      ...this.defaultHeaders,
+      Authorization: token,
+      Token: token,
+    };
   }
 
-  protected async request<T>(
+  /**
+   * Low-level HTTP execution with native fetch.
+   * Parses JSON and handles HTTP errors, returning the raw response body.
+   */
+  protected async requestRaw<T>(
     method: "GET" | "POST" | "DELETE" | "PUT",
     endpoint: string,
     data?: unknown,
@@ -72,14 +69,16 @@ export class BaseClient {
         headers,
         body: data ? JSON.stringify(data) : undefined,
       });
-    } catch (err: any) {
-      throw new WuzapiError(
-        0,
-        `Network error: ${err.message || "Failed to connect to WuzAPI"}`
-      );
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to connect to WuzAPI";
+      throw new WuzapiError(0, `Network error: ${errorMessage}`);
     }
 
-    const json: WuzapiResponse<T> = await res.json().catch(() => ({} as any));
+    const json = (await res.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
 
     if (this.config.debug) {
       logger.response(`[${method}] ${endpoint}`, {
@@ -88,10 +87,40 @@ export class BaseClient {
       });
     }
 
-    if (!res.ok || json.success === false) {
+    if (!res.ok) {
+      const errorMessage =
+        typeof json.error === "string"
+          ? json.error
+          : typeof json.message === "string"
+          ? json.message
+          : `API request failed with status ${res.status}`;
+      throw new WuzapiError(res.status, errorMessage, json);
+    }
+
+    return json as T;
+  }
+
+  /**
+   * High-level WuzAPI request wrapper.
+   * Calls requestRaw and unwraps the WuzAPI `.data` envelope.
+   */
+  protected async request<T>(
+    method: "GET" | "POST" | "DELETE" | "PUT",
+    endpoint: string,
+    data?: unknown,
+    options?: RequestOptions
+  ): Promise<T> {
+    const json = await this.requestRaw<WuzapiResponse<T>>(
+      method,
+      endpoint,
+      data,
+      options
+    );
+
+    if (json.success === false) {
       throw new WuzapiError(
-        json.code || res.status,
-        json.error || `API request failed with status ${res.status}`,
+        json.code || 500,
+        json.error || "API request failed",
         json
       );
     }
@@ -104,6 +133,13 @@ export class BaseClient {
     options?: RequestOptions
   ): Promise<T> {
     return this.request<T>("GET", endpoint, undefined, options);
+  }
+
+  protected async getRaw<T>(
+    endpoint: string,
+    options?: RequestOptions
+  ): Promise<T> {
+    return this.requestRaw<T>("GET", endpoint, undefined, options);
   }
 
   protected async post<T>(
