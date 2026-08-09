@@ -19,6 +19,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "prepare": "bun run build",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
@@ -43,7 +44,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gusnips/wuzapi-node.git"
+    "url": "https://github.com/katriellucas/wuzapi-node.git"
   },
   "devDependencies": {
     "@types/debug": "^4.1.13",
