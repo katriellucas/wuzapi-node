@@ -219,3 +219,13 @@ export interface ArchiveChatRequest {
 export interface ArchiveChatResponse {
   Details: string;
 }
+
+export interface SendPixRequest {
+  Phone: string;
+  MerchantName: string;
+  PixKey: string;
+  PixKeyType?: "PHONE" | "CPF" | "CNPJ" | "EMAIL" | "EVP";
+  Amount: number; // Integer (e.g. 15000 = 15.00 BRL)
+  Currency?: string;
+  Id?: string;
+}

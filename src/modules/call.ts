@@ -1,6 +1,6 @@
 import { BaseClient } from "../client.js";
-import { RequestOptions } from "../types/common.js";
-import { RejectCallRequest, RejectCallResponse } from "../types/call.js";
+import type { RequestOptions } from "../types/common.js";
+import type { RejectCallRequest, RejectCallResponse } from "../types/call.js";
 
 export class CallModule extends BaseClient {
     /**

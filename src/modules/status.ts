@@ -1,6 +1,6 @@
 import { BaseClient } from "../client.js";
-import { RequestOptions } from "../types/common.js";
-import { SetStatusTextRequest, SetStatusTextResponse } from "../types/status.js";
+import type { RequestOptions } from "../types/common.js";
+import type { SetStatusTextRequest, SetStatusTextResponse } from "../types/status.js";
 
 export class StatusModule extends BaseClient {
     /**

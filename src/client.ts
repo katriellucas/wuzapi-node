@@ -1,4 +1,4 @@
-import {
+import type {
   WuzapiConfig,
   WuzapiResponse,
   RequestOptions,
@@ -46,20 +46,40 @@ export class BaseClient {
   }
 
   /**
+   * Builds a full URL object using the native Web URL API
+   */
+  protected buildUrl(
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined | null>
+  ): URL {
+    const fullUrl = `${this.config.apiUrl}/${endpoint}`.replace(/([^:]\/)\/+/g, "$1");
+    const url = new URL(fullUrl);
+
+    for (const [key, value] of Object.entries(params ?? {})) {
+      if (value != null && value !== "") {
+        url.searchParams.set(key, String(value));
+      }
+    }
+
+    return url;
+  }
+
+  /**
    * Low-level HTTP execution with native fetch.
    * Parses JSON and handles HTTP errors, returning the raw response body.
    */
   protected async requestRaw<T>(
     method: "GET" | "POST" | "DELETE" | "PUT",
     endpoint: string,
+    params?: Record<string, string | number | boolean | undefined | null>,
     data?: unknown,
     options?: RequestOptions
   ): Promise<T> {
     const headers = this.buildHeaders(options);
-    const url = `${this.config.apiUrl}${endpoint}`;
+    const url = this.buildUrl(endpoint, params);
 
     if (this.config.debug) {
-      logger.request(`[${method}] ${endpoint}`, { headers, data });
+      logger.request(`[${method}] ${url.pathname}${url.search}`, { headers, data });
     }
 
     let res: Response;
@@ -81,19 +101,20 @@ export class BaseClient {
     >;
 
     if (this.config.debug) {
-      logger.response(`[${method}] ${endpoint}`, {
+      logger.response(`[${method}] ${url.pathname}${url.search}`, {
         status: res.status,
         data: json,
       });
     }
 
     if (!res.ok) {
-      const errorMessage =
-        typeof json.error === "string"
-          ? json.error
-          : typeof json.message === "string"
-          ? json.message
-          : `API request failed with status ${res.status}`;
+      let errorMessage = `API request failed with status ${res.status}`;
+      if (typeof json.error === "string" && json.error) {
+        errorMessage = json.error;
+      } else if (typeof json.message === "string" && json.message) {
+        errorMessage = json.message;
+      }
+
       throw new WuzapiError(res.status, errorMessage, json);
     }
 
@@ -107,12 +128,14 @@ export class BaseClient {
   protected async request<T>(
     method: "GET" | "POST" | "DELETE" | "PUT",
     endpoint: string,
+    params?: Record<string, string | number | boolean | undefined | null>,
     data?: unknown,
     options?: RequestOptions
   ): Promise<T> {
     const json = await this.requestRaw<WuzapiResponse<T>>(
       method,
       endpoint,
+      params,
       data,
       options
     );
@@ -130,16 +153,18 @@ export class BaseClient {
 
   protected async get<T>(
     endpoint: string,
+    params?: Record<string, string | number | boolean | undefined | null>,
     options?: RequestOptions
   ): Promise<T> {
-    return this.request<T>("GET", endpoint, undefined, options);
+    return this.request<T>("GET", endpoint, params, undefined, options);
   }
 
   protected async getRaw<T>(
     endpoint: string,
+    params?: Record<string, string | number | boolean | undefined | null>,
     options?: RequestOptions
   ): Promise<T> {
-    return this.requestRaw<T>("GET", endpoint, undefined, options);
+    return this.requestRaw<T>("GET", endpoint, params, undefined, options);
   }
 
   protected async post<T>(
@@ -147,7 +172,7 @@ export class BaseClient {
     data?: unknown,
     options?: RequestOptions
   ): Promise<T> {
-    return this.request<T>("POST", endpoint, data, options);
+    return this.request<T>("POST", endpoint, undefined, data, options);
   }
 
   protected async put<T>(
@@ -155,13 +180,13 @@ export class BaseClient {
     data?: unknown,
     options?: RequestOptions
   ): Promise<T> {
-    return this.request<T>("PUT", endpoint, data, options);
+    return this.request<T>("PUT", endpoint, undefined, data, options);
   }
 
   protected async delete<T>(
     endpoint: string,
     options?: RequestOptions
   ): Promise<T> {
-    return this.request<T>("DELETE", endpoint, undefined, options);
+    return this.request<T>("DELETE", endpoint, undefined, undefined, options);
   }
 }

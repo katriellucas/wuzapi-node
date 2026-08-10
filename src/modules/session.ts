@@ -1,5 +1,5 @@
 import { BaseClient } from "../client.js";
-import {
+import type {
   ConnectRequest,
   ConnectResponse,
   DisconnectResponse,
@@ -17,8 +17,9 @@ import {
   HmacConfigRequest,
   HmacConfigResponse,
   HmacDeleteResponse,
+  PasskeyStatusResponse,
 } from "../types/session.js";
-import { S3Config, RequestOptions, S3ConfigResponse } from "../types/common.js";
+import type { S3Config, RequestOptions, S3ConfigResponse } from "../types/common.js";
 
 export class SessionModule extends BaseClient {
   /**
@@ -53,14 +54,14 @@ export class SessionModule extends BaseClient {
    * Get session status
    */
   async getStatus(options?: RequestOptions): Promise<StatusResponse> {
-    return this.get<StatusResponse>("/session/status", options);
+    return this.get<StatusResponse>("/session/status", undefined, options);
   }
 
   /**
    * Get QR code for scanning
    */
   async getQRCode(options?: RequestOptions): Promise<QRCodeResponse> {
-    return this.get<QRCodeResponse>("/session/qr", options);
+    return this.get<QRCodeResponse>("/session/qr", undefined, options);
   }
 
   /**
@@ -77,7 +78,7 @@ export class SessionModule extends BaseClient {
    * Get S3 configuration
    */
   async getS3Config(options?: RequestOptions): Promise<S3ConfigResponse> {
-    return this.get<S3ConfigResponse>("/session/s3/config", options);
+    return this.get<S3ConfigResponse>("/session/s3/config", undefined, options);
   }
 
   /**
@@ -109,7 +110,7 @@ export class SessionModule extends BaseClient {
    * Request history sync from WhatsApp servers
    */
   async requestHistory(options?: RequestOptions): Promise<HistoryResponse> {
-    return this.get<HistoryResponse>("/session/history", options);
+    return this.get<HistoryResponse>("/session/history", undefined, options);
   }
 
   /**
@@ -154,7 +155,7 @@ export class SessionModule extends BaseClient {
    * Get HMAC configuration status
    */
   async getHmacConfig(options?: RequestOptions): Promise<HmacConfigResponse> {
-    return this.get<HmacConfigResponse>("/session/hmac/config", options);
+    return this.get<HmacConfigResponse>("/session/hmac/config", undefined, options);
   }
 
   /**
@@ -162,5 +163,14 @@ export class SessionModule extends BaseClient {
    */
   async deleteHmacConfig(options?: RequestOptions): Promise<HmacDeleteResponse> {
     return this.delete<HmacDeleteResponse>("/session/hmac/config", options);
+  }
+
+  /**
+   * Get passkey status
+   */
+  async getPasskeyStatus(
+    options?: RequestOptions
+  ): Promise<PasskeyStatusResponse> {
+    return this.get<PasskeyStatusResponse>("/session/passkey-status", undefined, options);
   }
 }

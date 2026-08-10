@@ -1,16 +1,16 @@
 import { BaseClient } from "../client.js";
-import { RequestOptions } from "../types/common.js";
-import {
+import { WEBHOOK_EVENTS, WebhookEventType } from "../types/webhook.js";
+import type { RequestOptions } from "../types/common.js";
+import type {
   SetWebhookRequest,
   SetWebhookResponse,
   GetWebhookResponse,
   UpdateWebhookRequest,
   UpdateWebhookResponse,
   DeleteWebhookResponse,
-  WebhookEventType,
   WebhookEvent,
-  WEBHOOK_EVENTS,
 } from "../types/webhook.js";
+
 
 export class WebhookModule extends BaseClient {
   /**
@@ -29,7 +29,7 @@ export class WebhookModule extends BaseClient {
    * Get current webhook configuration
    */
   async getWebhook(options?: RequestOptions): Promise<GetWebhookResponse> {
-    return this.get<GetWebhookResponse>("/webhook", options);
+    return this.get<GetWebhookResponse>("/webhook", undefined, options);
   }
 
   /**

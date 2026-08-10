@@ -1,6 +1,6 @@
 import { BaseClient } from "../client.js";
-import { RequestOptions } from "../types/common.js";
-import {
+import type { RequestOptions } from "../types/common.js";
+import type {
   GroupListResponse,
   GroupInviteLinkResponse,
   GroupInfo,
@@ -40,7 +40,7 @@ export class GroupModule extends BaseClient {
    * List all subscribed groups
    */
   async list(options?: RequestOptions): Promise<GroupListResponse> {
-    return this.get<GroupListResponse>("/group/list", options);
+    return this.get<GroupListResponse>("/group/list", undefined, options);
   }
 
   /**
@@ -48,14 +48,14 @@ export class GroupModule extends BaseClient {
    */
   async getInviteLink(
     groupJID: string,
-    reset: boolean = false,
+    params?: { reset?: boolean },
     options?: RequestOptions
   ): Promise<GroupInviteLinkResponse> {
-    const params = `groupJID=${encodeURIComponent(groupJID)}&reset=${reset}`;
-    return this.get<GroupInviteLinkResponse>(
-      `/group/invitelink?${params}`,
-      options
-    );
+    const query = {
+      groupJID,
+      reset: params?.reset,
+    };
+    return this.get<GroupInviteLinkResponse>("/group/invitelink", query, options);
   }
 
   /**
@@ -65,8 +65,8 @@ export class GroupModule extends BaseClient {
     groupJID: string,
     options?: RequestOptions
   ): Promise<GroupInfo> {
-    const params = `groupJID=${encodeURIComponent(groupJID)}`;
-    return this.get<GroupInfo>(`/group/info?${params}`, options);
+    const query = { groupJID };
+    return this.get<GroupInfo>("/group/info", query, options);
   }
 
   /**
@@ -250,9 +250,10 @@ export class GroupModule extends BaseClient {
     groupJID: string,
     options?: RequestOptions
   ): Promise<GroupRequestParticipantsResponse> {
-    const params = `groupJID=${encodeURIComponent(groupJID)}`;
+    const query = { groupJID };
     return this.get<GroupRequestParticipantsResponse>(
-      `/group/requestparticipants?${params}`,
+      "/group/requestparticipants",
+      query,
       options
     );
   }

@@ -1,6 +1,6 @@
 import { BaseClient } from "../client.js";
-import { RequestOptions } from "../types/common.js";
-import {
+import type { RequestOptions } from "../types/common.js";
+import type {
   UserInfoRequest,
   UserInfoResponse,
   UserCheckRequest,
@@ -47,18 +47,27 @@ export class UserModule extends BaseClient {
    */
   async getAvatar(
     phone: string,
-    preview: boolean = true,
+    params?: { preview?: boolean },
     options?: RequestOptions
   ): Promise<UserAvatarResponse> {
-    const request: UserAvatarRequest = { Phone: phone, Preview: preview };
+    const request: UserAvatarRequest = {
+      Phone: phone,
+      Preview: params?.preview ?? true,
+    };
     return this.post<UserAvatarResponse>("/user/avatar", request, options);
   }
 
   /**
-   * Get all contacts
+   * Get contacts list
+   * @param params - Optional query filters (e.g. { savedOnly: true })
+   * @param options - Optional per-request options
    */
-  async getContacts(options?: RequestOptions): Promise<ContactsResponse> {
-    return this.get<ContactsResponse>("/user/contacts", options);
+  async getContacts(
+    params?: { savedOnly?: boolean },
+    options?: RequestOptions
+  ): Promise<ContactsResponse> {
+    const query = { saved_only: params?.savedOnly };
+    return this.get<ContactsResponse>("/user/contacts", query, options);
   }
 
   /**
@@ -73,20 +82,38 @@ export class UserModule extends BaseClient {
   }
 
   /**
+   * Subscribe to a contact's presence updates (online/offline status)
+   */
+  async subscribePresence(
+    phone: string,
+    options?: RequestOptions
+  ): Promise<{ Details: string }> {
+    return this.post<{ Details: string }>(
+      "/user/presence/subscribe",
+      { Phone: phone },
+      options
+    );
+  }
+
+  /**
    * Get LID (Linked ID) from phone number or JID
    */
   async getLid(
     phone: string,
     options?: RequestOptions
   ): Promise<UserLidResponse> {
-    return this.get<UserLidResponse>(`/user/lid/${encodeURIComponent(phone)}`, options);
+    return this.get<UserLidResponse>(
+      `/user/lid/${encodeURIComponent(phone)}`,
+      undefined,
+      options
+    );
   }
 
   /**
    * Get user privacy settings
    */
   async getPrivacy(options?: RequestOptions): Promise<UserPrivacySettings> {
-    return this.get<UserPrivacySettings>("/user/privacy", options);
+    return this.get<UserPrivacySettings>("/user/privacy", undefined, options);
   }
 
   /**
@@ -125,6 +152,6 @@ export class UserModule extends BaseClient {
    * Get the current blocklist
    */
   async getBlocklist(options?: RequestOptions): Promise<UserBlocklistResponse> {
-    return this.get<UserBlocklistResponse>("/user/blocklist", options);
+    return this.get<UserBlocklistResponse>("/user/blocklist", undefined, options);
   }
 }

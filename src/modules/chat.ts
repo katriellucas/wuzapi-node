@@ -1,6 +1,6 @@
 import { BaseClient } from "../client.js";
-import { RequestOptions } from "../types/common.js";
-import {
+import type { RequestOptions } from "../types/common.js";
+import type {
   SendMessageResponse,
   SendTextRequest,
   SendTemplateRequest,
@@ -29,6 +29,7 @@ import {
   RequestUnavailableMessageResponse,
   ArchiveChatRequest,
   ArchiveChatResponse,
+  SendPixRequest,
 } from "../types/chat.js";
 
 export class ChatModule extends BaseClient {
@@ -40,6 +41,16 @@ export class ChatModule extends BaseClient {
     options?: RequestOptions
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/send/text", request, options);
+  }
+
+  /**
+   * Send a PIX payment request (URUPIX extension)
+   */
+  async sendPix(
+    request: SendPixRequest,
+    options?: RequestOptions
+  ): Promise<SendMessageResponse> {
+    return this.post<SendMessageResponse>("/chat/send/pix", request, options);
   }
 
   /**
@@ -325,19 +336,14 @@ export class ChatModule extends BaseClient {
    */
   async getChatHistory(
     chatJid: string,
-    limit?: number,
+    params?: { limit?: number },
     options?: RequestOptions
   ): Promise<GetChatHistoryResponse> {
-    const queryParams: string[] = [`chat_jid=${encodeURIComponent(chatJid)}`];
-
-    if (limit !== undefined) {
-      queryParams.push(`limit=${limit}`);
-    }
-
-    return this.get<GetChatHistoryResponse>(
-      `/chat/history?${queryParams.join("&")}`,
-      options
-    );
+    const query = {
+      chat_jid: chatJid,
+      limit: params?.limit,
+    };
+    return this.get<GetChatHistoryResponse>("/chat/history", query, options);
   }
 
   /**

@@ -93,3 +93,8 @@ export interface HmacConfigResponse {
 export interface HmacDeleteResponse {
   Details: string;
 }
+
+export interface PasskeyStatusResponse {
+  passkeyPending: boolean;
+  publicKey?: unknown;
+}

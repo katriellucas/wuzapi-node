@@ -1,6 +1,6 @@
 import { BaseClient } from "../client.js";
-import { RequestOptions } from "../types/common.js";
-import {
+import type { RequestOptions } from "../types/common.js";
+import type {
   User,
   CreateUserRequest,
   CreateUserResponse,
@@ -14,14 +14,14 @@ export class AdminModule extends BaseClient {
    * List all users
    */
   async listUsers(options?: RequestOptions): Promise<User[]> {
-    return this.get<User[]>("/admin/users", options);
+    return this.get<User[]>("/admin/users", undefined, options);
   }
 
   /**
    * Get a user by ID
    */
   async getUser(id: string, options?: RequestOptions): Promise<User> {
-    return this.get<User>(`/admin/users/${id}`, options);
+    return this.get<User>(`/admin/users/${id}`, undefined, options);
   }
 
   /**

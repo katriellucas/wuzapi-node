@@ -1,6 +1,6 @@
 import { BaseClient } from "../client.js";
-import { HealthResponse } from "../types/system.js";
-import { RequestOptions } from "../types/common.js";
+import type { HealthResponse } from "../types/system.js";
+import type { RequestOptions } from "../types/common.js";
 
 export class SystemModule extends BaseClient {
   /**
@@ -8,6 +8,6 @@ export class SystemModule extends BaseClient {
    * Endpoint to verify if the API is running correctly and retrieve service statistics.
    */
   async getHealth(options?: RequestOptions): Promise<HealthResponse> {
-    return this.getRaw<HealthResponse>("/health", options);
+    return this.getRaw<HealthResponse>("/health", undefined, options);
   }
 }
