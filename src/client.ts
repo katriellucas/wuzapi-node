@@ -5,188 +5,185 @@ import type {
 } from "./types/common.js";
 import { logger } from "./utils/logger.js";
 
-export class WuzapiError extends Error {
-  public code: number;
-  public details?: unknown;
+type HttpMethod = "GET" | "POST" | "DELETE" | "PUT";
 
-  constructor(code: number, message: string, details?: unknown) {
+type QueryParams = Record<string, string | number | boolean | undefined | null>;
+
+/**
+ * WuzAPI reports a failure reason in `error`, or occasionally as a bare string
+ * `data`. `message` only appears on responses that are not WuzAPI envelopes.
+ */
+function resolveErrorMessage(body: unknown, fallback: string): string {
+  if (typeof body !== "object" || body === null) return fallback;
+
+  const { error, message, data } = body as Record<string, unknown>;
+
+  if (typeof error === "string") return error;
+  if (typeof message === "string") return message;
+  if (typeof data === "string") return data;
+
+  return fallback;
+}
+
+export class WuzapiError extends Error {
+  constructor(
+    public code: number,
+    message: string,
+    public details?: unknown,
+  ) {
     super(message);
     this.name = "WuzapiError";
-    this.code = code;
-    this.details = details;
   }
 }
 
 export class BaseClient {
-  protected config: WuzapiConfig;
-  protected defaultHeaders: Record<string, string> = {
+  private readonly defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  constructor(config: WuzapiConfig) {
-    this.config = config;
-  }
+  /**
+   * Which credential this module's endpoints authenticate with. Overridden to
+   * `"admin"` by `AdminModule`; every other module is on user auth.
+   */
+  protected readonly authScheme: "user" | "admin" = "user";
+
+  constructor(protected config: WuzapiConfig) {}
 
   /**
-   * Resolve headers with authentication token
+   * Build the auth header the endpoint requires.
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
-    const token = options?.token || this.config.token;
+    const isAdmin = this.authScheme === "admin";
+
+    const token =
+      options?.token ?? (isAdmin ? this.config.adminToken : this.config.token);
+
     if (!token) {
       throw new WuzapiError(
         401,
-        "No authentication token provided. Either set a token in the client config or provide one in the request options."
+        isAdmin
+          ? "No admin token provided. Set `adminToken` in the client config, or pass `{ token }` in the request options."
+          : "No user token provided. Set `token` in the client config, or pass `{ token }` in the request options.",
       );
     }
+
     return {
       ...this.defaultHeaders,
-      Authorization: token,
-      Token: token,
+      [isAdmin ? "Authorization" : "token"]: token,
     };
   }
 
   /**
-   * Builds a full URL object using the native Web URL API
+   * Builds a full URL using the native URL API.
    */
-  protected buildUrl(
-    endpoint: string,
-    params?: Record<string, string | number | boolean | undefined | null>
-  ): URL {
-    const fullUrl = `${this.config.apiUrl}/${endpoint}`.replace(/([^:]\/)\/+/g, "$1");
-    const url = new URL(fullUrl);
+  protected buildUrl(endpoint: string, params?: QueryParams): URL {
+    const url = new URL(
+      `${this.config.apiUrl}/${endpoint}`.replace(/([^:]\/)\/+/g, "$1"),
+    );
 
     for (const [key, value] of Object.entries(params ?? {})) {
-      if (value != null && value !== "") {
-        url.searchParams.set(key, String(value));
-      }
+      if (value == null || value === "") continue;
+
+      url.searchParams.set(key, String(value));
     }
 
     return url;
   }
 
   /**
-   * Low-level HTTP execution with native fetch.
-   * Parses JSON and handles HTTP errors, returning the raw response body.
+   * Execute an authenticated WuzAPI request and unwrap its `.data` envelope.
    */
-  protected async requestRaw<T>(
-    method: "GET" | "POST" | "DELETE" | "PUT",
+  protected async request<T>(
+    method: HttpMethod,
     endpoint: string,
-    params?: Record<string, string | number | boolean | undefined | null>,
+    params?: QueryParams,
     data?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     const headers = this.buildHeaders(options);
     const url = this.buildUrl(endpoint, params);
 
     if (this.config.debug) {
-      logger.request(`[${method}] ${url.pathname}${url.search}`, { headers, data });
+      logger.request(`[${method}] ${url.pathname}${url.search}`, {
+        headers,
+        data,
+      });
     }
 
-    let res: Response;
+    let response: Response;
+
     try {
-      res = await fetch(url, {
+      response = await fetch(url, {
         method,
         headers,
-        body: data ? JSON.stringify(data) : undefined,
+        body: data === undefined ? undefined : JSON.stringify(data),
       });
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to connect to WuzAPI";
-      throw new WuzapiError(0, `Network error: ${errorMessage}`);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to connect to WuzAPI";
+
+      throw new WuzapiError(0, `Network error: ${message}`);
     }
 
-    const json = (await res.json().catch(() => ({}))) as Record<
-      string,
-      unknown
-    >;
+    const json = (await response.json().catch(() => ({}))) as WuzapiResponse<T>;
 
     if (this.config.debug) {
       logger.response(`[${method}] ${url.pathname}${url.search}`, {
-        status: res.status,
+        status: response.status,
         data: json,
       });
     }
 
-    if (!res.ok) {
-      let errorMessage = `API request failed with status ${res.status}`;
-      if (typeof json.error === "string" && json.error) {
-        errorMessage = json.error;
-      } else if (typeof json.message === "string" && json.message) {
-        errorMessage = json.message;
-      }
-
-      throw new WuzapiError(res.status, errorMessage, json);
+    if (!response.ok) {
+      throw new WuzapiError(
+        response.status,
+        resolveErrorMessage(
+          json,
+          `API request failed with status ${response.status}`,
+        ),
+        json,
+      );
     }
 
-    return json as T;
-  }
+    const invalidCode =
+      typeof json.code === "number" && (json.code < 200 || json.code >= 300);
 
-  /**
-   * High-level WuzAPI request wrapper.
-   * Calls requestRaw and unwraps the WuzAPI `.data` envelope.
-   */
-  protected async request<T>(
-    method: "GET" | "POST" | "DELETE" | "PUT",
-    endpoint: string,
-    params?: Record<string, string | number | boolean | undefined | null>,
-    data?: unknown,
-    options?: RequestOptions
-  ): Promise<T> {
-    const json = await this.requestRaw<WuzapiResponse<T>>(
-      method,
-      endpoint,
-      params,
-      data,
-      options
-    );
-
-    if (json.success === false) {
+    if (!json.success || invalidCode) {
       throw new WuzapiError(
-        json.code || 500,
-        json.error || "API request failed",
-        json
+        json.code ?? 500,
+        resolveErrorMessage(json, "API request failed"),
+        json,
       );
     }
 
     return json.data;
   }
 
-  protected async get<T>(
+  protected get<T>(
     endpoint: string,
-    params?: Record<string, string | number | boolean | undefined | null>,
-    options?: RequestOptions
+    params?: QueryParams,
+    options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("GET", endpoint, params, undefined, options);
   }
 
-  protected async getRaw<T>(
-    endpoint: string,
-    params?: Record<string, string | number | boolean | undefined | null>,
-    options?: RequestOptions
-  ): Promise<T> {
-    return this.requestRaw<T>("GET", endpoint, params, undefined, options);
-  }
-
-  protected async post<T>(
+  protected post<T>(
     endpoint: string,
     data?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("POST", endpoint, undefined, data, options);
   }
 
-  protected async put<T>(
+  protected put<T>(
     endpoint: string,
     data?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("PUT", endpoint, undefined, data, options);
   }
 
-  protected async delete<T>(
-    endpoint: string,
-    options?: RequestOptions
-  ): Promise<T> {
+  protected delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("DELETE", endpoint, undefined, undefined, options);
   }
 }

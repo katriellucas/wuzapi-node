@@ -18,8 +18,15 @@ import type {
   HmacConfigResponse,
   HmacDeleteResponse,
   PasskeyStatusResponse,
+  PasskeyResponseRequest,
+  PasskeyResponseResult,
+  PasskeyConfirmResult,
 } from "../types/session.js";
-import type { S3Config, RequestOptions, S3ConfigResponse } from "../types/common.js";
+import type {
+  S3Config,
+  RequestOptions,
+  S3ConfigResponse,
+} from "../types/common.js";
 
 export class SessionModule extends BaseClient {
   /**
@@ -27,20 +34,23 @@ export class SessionModule extends BaseClient {
    */
   async connect(
     request: ConnectRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<ConnectResponse> {
     return this.post<ConnectResponse>("/session/connect", request, options);
   }
 
   /**
-   * Disconnect from WhatsApp servers
+   * Disconnect from WhatsApp servers.
+   * @param clear also clear the stored event subscriptions (the server keeps them by default)
    */
-  async disconnect(options?: RequestOptions): Promise<DisconnectResponse> {
-    return this.post<DisconnectResponse>(
-      "/session/disconnect",
-      undefined,
-      options
-    );
+  async disconnect(
+    clear?: boolean,
+    options?: RequestOptions,
+  ): Promise<DisconnectResponse> {
+    const path = clear
+      ? "/session/disconnect?clear=true"
+      : "/session/disconnect";
+    return this.post<DisconnectResponse>(path, undefined, options);
   }
 
   /**
@@ -69,7 +79,7 @@ export class SessionModule extends BaseClient {
    */
   async configureS3(
     config: S3Config,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<S3ConfigResponse> {
     return this.post<S3ConfigResponse>("/session/s3/config", config, options);
   }
@@ -100,10 +110,53 @@ export class SessionModule extends BaseClient {
    */
   async pairPhone(
     phone: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<PairPhoneResponse> {
     const request: PairPhoneRequest = { Phone: phone };
     return this.post<PairPhoneResponse>("/session/pairphone", request, options);
+  }
+
+  /**
+   * Get pending passkey pairing status. Returns the WebAuthn challenge when
+   * the device initiated passkey pairing instead of QR.
+   */
+  async getPasskeyStatus(
+    options?: RequestOptions,
+  ): Promise<PasskeyStatusResponse> {
+    return this.get<PasskeyStatusResponse>(
+      "/session/passkey-status",
+      undefined,
+      options,
+    );
+  }
+
+  /**
+   * Complete passkey pairing by sending the WebAuthn response from the
+   * authenticator, after receiving a `PasskeyRequest` webhook.
+   */
+  async sendPasskeyResponse(
+    request: PasskeyResponseRequest,
+    options?: RequestOptions,
+  ): Promise<PasskeyResponseResult> {
+    return this.post<PasskeyResponseResult>(
+      "/session/passkey-response",
+      request,
+      options,
+    );
+  }
+
+  /**
+   * Confirm that the 8-character pairing code was displayed to the user and
+   * matches the phone, after receiving a `PasskeyConfirmation` webhook.
+   */
+  async confirmPasskey(
+    options?: RequestOptions,
+  ): Promise<PasskeyConfirmResult> {
+    return this.post<PasskeyConfirmResult>(
+      "/session/passkey-confirm",
+      undefined,
+      options,
+    );
   }
 
   /**
@@ -118,25 +171,33 @@ export class SessionModule extends BaseClient {
    */
   async setHistoryCount(
     history: number,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<HistoryCountResponse> {
     const request: HistoryCountRequest = { history };
     return this.post<HistoryCountResponse>(
       "/session/history",
       request,
-      options
+      options,
     );
   }
 
   /**
    * Set proxy configuration
+   * @param webhookUseProxy route webhook deliveries through this proxy; omitted preserves the current per-user value
    */
   async setProxy(
     proxyURL: string,
     enable: boolean = true,
-    options?: RequestOptions
+    webhookUseProxy?: boolean,
+    options?: RequestOptions,
   ): Promise<ProxyResponse> {
-    const request: ProxyRequest = { proxy_url: proxyURL, enable: enable };
+    const request: ProxyRequest = {
+      proxy_url: proxyURL,
+      enable,
+      ...(webhookUseProxy !== undefined && {
+        webhook_use_proxy: webhookUseProxy,
+      }),
+    };
     return this.post<ProxyResponse>("/session/proxy", request, options);
   }
 
@@ -145,32 +206,33 @@ export class SessionModule extends BaseClient {
    */
   async configureHmac(
     hmacKey: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<HmacConfigResponse> {
     const request: HmacConfigRequest = { hmac_key: hmacKey };
-    return this.post<HmacConfigResponse>("/session/hmac/config", request, options);
+    return this.post<HmacConfigResponse>(
+      "/session/hmac/config",
+      request,
+      options,
+    );
   }
 
   /**
    * Get HMAC configuration status
    */
   async getHmacConfig(options?: RequestOptions): Promise<HmacConfigResponse> {
-    return this.get<HmacConfigResponse>("/session/hmac/config", undefined, options);
+    return this.get<HmacConfigResponse>(
+      "/session/hmac/config",
+      undefined,
+      options,
+    );
   }
 
   /**
    * Delete HMAC configuration
    */
-  async deleteHmacConfig(options?: RequestOptions): Promise<HmacDeleteResponse> {
+  async deleteHmacConfig(
+    options?: RequestOptions,
+  ): Promise<HmacDeleteResponse> {
     return this.delete<HmacDeleteResponse>("/session/hmac/config", options);
-  }
-
-  /**
-   * Get passkey status
-   */
-  async getPasskeyStatus(
-    options?: RequestOptions
-  ): Promise<PasskeyStatusResponse> {
-    return this.get<PasskeyStatusResponse>("/session/passkey-status", undefined, options);
   }
 }

@@ -24,7 +24,8 @@ const client = CONFIG.useFlexibleTokens
     })
   : new WuzapiClient({
       apiUrl: CONFIG.apiUrl,
-      token: CONFIG.userToken, // Traditional global token
+      token: CONFIG.userToken, // User token → `token` header
+      adminToken: CONFIG.adminToken, // Admin token → `Authorization` header
     });
 
 // Helper function to get request options for flexible token usage
@@ -216,7 +217,7 @@ async function initializeBot() {
 process.on("SIGINT", async () => {
   console.log("\n🛑 Shutting down bot...");
   try {
-    await client.session.disconnect(getRequestOptions());
+    await client.session.disconnect(undefined, getRequestOptions());
     console.log("✅ Disconnected from WhatsApp");
   } catch (error) {
     console.error("❌ Error during shutdown:", error);

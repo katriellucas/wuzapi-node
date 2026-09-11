@@ -10,6 +10,8 @@ import type {
   ContactsResponse,
   UserPresenceRequest,
   UserPresenceResponse,
+  SubscribePresenceRequest,
+  SubscribePresenceResponse,
   UserLidResponse,
   UserPrivacySettings,
   PrivacySettingValueMap,
@@ -25,7 +27,7 @@ export class UserModule extends BaseClient {
    */
   async getInfo(
     phones: string[],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UserInfoResponse> {
     const request: UserInfoRequest = { Phone: phones };
     return this.post<UserInfoResponse>("/user/info", request, options);
@@ -36,7 +38,7 @@ export class UserModule extends BaseClient {
    */
   async check(
     phones: string[],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UserCheckResponse> {
     const request: UserCheckRequest = { Phone: phones };
     return this.post<UserCheckResponse>("/user/check", request, options);
@@ -48,7 +50,7 @@ export class UserModule extends BaseClient {
   async getAvatar(
     phone: string,
     params?: { preview?: boolean },
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UserAvatarResponse> {
     const request: UserAvatarRequest = {
       Phone: phone,
@@ -64,7 +66,7 @@ export class UserModule extends BaseClient {
    */
   async getContacts(
     params?: { savedOnly?: boolean },
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<ContactsResponse> {
     const query = { saved_only: params?.savedOnly };
     return this.get<ContactsResponse>("/user/contacts", query, options);
@@ -75,23 +77,24 @@ export class UserModule extends BaseClient {
    */
   async sendPresence(
     presenceType: "available" | "unavailable",
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UserPresenceResponse> {
     const request: UserPresenceRequest = { type: presenceType };
     return this.post<UserPresenceResponse>("/user/presence", request, options);
   }
 
   /**
-   * Subscribe to a contact's presence updates (online/offline status)
+   * Subscribe to a contact's presence updates. Delivered via `Presence` webhooks.
    */
   async subscribePresence(
     phone: string,
-    options?: RequestOptions
-  ): Promise<{ Details: string }> {
-    return this.post<{ Details: string }>(
+    options?: RequestOptions,
+  ): Promise<SubscribePresenceResponse> {
+    const request: SubscribePresenceRequest = { Phone: phone };
+    return this.post<SubscribePresenceResponse>(
       "/user/presence/subscribe",
-      { Phone: phone },
-      options
+      request,
+      options,
     );
   }
 
@@ -100,12 +103,12 @@ export class UserModule extends BaseClient {
    */
   async getLid(
     phone: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UserLidResponse> {
     return this.get<UserLidResponse>(
       `/user/lid/${encodeURIComponent(phone)}`,
       undefined,
-      options
+      options,
     );
   }
 
@@ -122,10 +125,14 @@ export class UserModule extends BaseClient {
   async setPrivacy<K extends keyof PrivacySettingValueMap>(
     name: K,
     value: PrivacySettingValueMap[K],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<Partial<UserPrivacySettings>> {
     const request = { Name: name, Value: value };
-    return this.post<Partial<UserPrivacySettings>>("/user/privacy", request, options);
+    return this.post<Partial<UserPrivacySettings>>(
+      "/user/privacy",
+      request,
+      options,
+    );
   }
 
   /**
@@ -133,7 +140,7 @@ export class UserModule extends BaseClient {
    */
   async blockUser(
     request: UserBlockRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UserBlockResponse> {
     return this.post<UserBlockResponse>("/user/block", request, options);
   }
@@ -143,7 +150,7 @@ export class UserModule extends BaseClient {
    */
   async unblockUser(
     request: UserBlockRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UserUnblockResponse> {
     return this.post<UserUnblockResponse>("/user/unblock", request, options);
   }
@@ -152,6 +159,10 @@ export class UserModule extends BaseClient {
    * Get the current blocklist
    */
   async getBlocklist(options?: RequestOptions): Promise<UserBlocklistResponse> {
-    return this.get<UserBlocklistResponse>("/user/blocklist", undefined, options);
+    return this.get<UserBlocklistResponse>(
+      "/user/blocklist",
+      undefined,
+      options,
+    );
   }
 }
