@@ -2,7 +2,7 @@
 
 export type QueryParams = Record<
   string,
-  string | number | boolean | undefined | null
+  string | number | boolean | undefined
 >;
 
 export interface WuzapiConfig {

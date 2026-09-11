@@ -1,8 +1,8 @@
+import ky, { HTTPError, type KyInstance } from "ky";
 import type {
   WuzapiConfig,
   WuzapiResponse,
   RequestOptions,
-  QueryParams,
 } from "./types/common.js";
 import { logger } from "./utils/logger.js";
 
@@ -24,6 +24,24 @@ function resolveErrorMessage(body: unknown, fallback: string): string {
   return fallback;
 }
 
+/**
+ * Convert Ky transport errors into the public error shape exposed by this SDK.
+ */
+function toWuzapiError(error: Error): WuzapiError {
+  if (error instanceof HTTPError) {
+    return new WuzapiError(
+      error.response.status,
+      resolveErrorMessage(
+        error.data,
+        `API request failed with status ${error.response.status}`,
+      ),
+      error.data,
+    );
+  }
+
+  return new WuzapiError(0, `Network error: ${error.message}`, error);
+}
+
 export class WuzapiError extends Error {
   constructor(
     public code: number,
@@ -36,9 +54,7 @@ export class WuzapiError extends Error {
 }
 
 export class BaseClient {
-  private readonly defaultHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+  private readonly http: KyInstance;
 
   /**
    * Which credential this module's endpoints authenticate with. Overridden to
@@ -46,18 +62,26 @@ export class BaseClient {
    */
   protected readonly authScheme: "user" | "admin" = "user";
 
-  constructor(protected config: WuzapiConfig) {}
+  constructor(protected config: WuzapiConfig) {
+    this.http = ky.create({
+      prefix: config.apiUrl,
+      retry: 0,
+      timeout: false,
+      hooks: {
+        beforeError: [
+          ({ error }): WuzapiError => toWuzapiError(error),
+        ],
+      },
+    });
+  }
 
   /**
-   * Build the headers required by the request.
+   * Build the authentication headers required by the request.
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
-    if (options?.auth === false) {
-      return { ...this.defaultHeaders };
-    }
+    if (options?.auth === false) return {};
 
     const isAdmin = this.authScheme === "admin";
-
     const token =
       options?.token ?? (isAdmin ? this.config.adminToken : this.config.token);
 
@@ -71,84 +95,36 @@ export class BaseClient {
     }
 
     return {
-      ...this.defaultHeaders,
       [isAdmin ? "Authorization" : "token"]: token,
     };
-  }
-
-  /**
-   * Builds a full URL using the native URL API.
-   */
-  protected buildUrl(endpoint: string, params?: QueryParams): URL {
-    const url = new URL(
-      `${this.config.apiUrl}/${endpoint}`.replace(/([^:]\/)\/+/g, "$1"),
-    );
-
-    for (const [key, value] of Object.entries(params ?? {})) {
-      if (value == null || value === "") continue;
-
-      url.searchParams.set(key, String(value));
-    }
-
-    return url;
   }
 
   /**
    * Execute an HTTP request and return its parsed response body without
    * interpreting it as a WuzAPI response envelope.
    */
-  protected async requestRaw<T>(
+  protected requestRaw<T>(
     method: HttpMethod,
     endpoint: string,
     data?: unknown,
     options?: RequestOptions,
   ): Promise<T> {
     const headers = this.buildHeaders(options);
-    const url = this.buildUrl(endpoint, options?.params);
 
     if (this.config.debug) {
-      logger.request(`[${method}] ${url.pathname}${url.search}`, {
+      logger.request(`[${method}] ${endpoint}`, {
         headers,
+        params: options?.params,
         data,
       });
     }
 
-    let response: Response;
-
-    try {
-      response = await fetch(url, {
-        method,
-        headers,
-        body: data === undefined ? undefined : JSON.stringify(data),
-      });
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to connect to WuzAPI";
-
-      throw new WuzapiError(0, `Network error: ${message}`);
-    }
-
-    const json = (await response.json().catch(() => ({}))) as unknown;
-
-    if (this.config.debug) {
-      logger.response(`[${method}] ${url.pathname}${url.search}`, {
-        status: response.status,
-        data: json,
-      });
-    }
-
-    if (!response.ok) {
-      throw new WuzapiError(
-        response.status,
-        resolveErrorMessage(
-          json,
-          `API request failed with status ${response.status}`,
-        ),
-        json,
-      );
-    }
-
-    return json as T;
+    return this.http(endpoint, {
+      method,
+      headers,
+      searchParams: options?.params,
+      ...(data === undefined ? {} : { json: data }),
+    }).json<T>();
   }
 
   /**
@@ -161,31 +137,29 @@ export class BaseClient {
     data?: unknown,
     options?: RequestOptions,
   ): Promise<T> {
-    const json = await this.requestRaw<WuzapiResponse<T>>(
+    const response = await this.requestRaw<WuzapiResponse<T>>(
       method,
       endpoint,
       data,
       options,
     );
 
-    const invalidCode =
-      typeof json.code === "number" && (json.code < 200 || json.code >= 300);
+    const validCode =
+      typeof response.code !== "number" ||
+      (response.code >= 200 && response.code < 300);
 
-    if (!json.success || invalidCode) {
-      throw new WuzapiError(
-        json.code ?? 500,
-        resolveErrorMessage(json, "API request failed"),
-        json,
-      );
+    if (response.success && validCode) {
+      return response.data;
     }
 
-    return json.data;
+    throw new WuzapiError(
+      response.code ?? 500,
+      resolveErrorMessage(response, "API request failed"),
+      response,
+    );
   }
 
-  protected get<T>(
-    endpoint: string,
-    options?: RequestOptions,
-  ): Promise<T> {
+  protected get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("GET", endpoint, undefined, options);
   }
 

@@ -1,4 +1,4 @@
-export type QueryParams = Record<string, string | number | boolean | undefined | null>;
+export type QueryParams = Record<string, string | number | boolean | undefined>;
 export interface WuzapiConfig {
     apiUrl: string;
     /** User token, sent as the `token` header on every non-admin endpoint. */

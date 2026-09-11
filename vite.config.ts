@@ -36,7 +36,7 @@ export default defineConfig({
       formats: ["cjs"],
     },
     rollupOptions: {
-      external: [],
+      external: ["ky"],
       output: {
         entryFileNames: "[name].js",
         chunkFileNames: "[name].js",

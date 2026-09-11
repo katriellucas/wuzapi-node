@@ -1,4 +1,4 @@
-import { WuzapiConfig, RequestOptions, QueryParams } from './types/common.js';
+import { WuzapiConfig, RequestOptions } from './types/common.js';
 type HttpMethod = "GET" | "POST" | "DELETE" | "PUT";
 export declare class WuzapiError extends Error {
     code: number;
@@ -7,7 +7,7 @@ export declare class WuzapiError extends Error {
 }
 export declare class BaseClient {
     protected config: WuzapiConfig;
-    private readonly defaultHeaders;
+    private readonly http;
     /**
      * Which credential this module's endpoints authenticate with. Overridden to
      * `"admin"` by `AdminModule`; every other module is on user auth.
@@ -15,13 +15,9 @@ export declare class BaseClient {
     protected readonly authScheme: "user" | "admin";
     constructor(config: WuzapiConfig);
     /**
-     * Build the headers required by the request.
+     * Build the authentication headers required by the request.
      */
     private buildHeaders;
-    /**
-     * Builds a full URL using the native URL API.
-     */
-    protected buildUrl(endpoint: string, params?: QueryParams): URL;
     /**
      * Execute an HTTP request and return its parsed response body without
      * interpreting it as a WuzAPI response envelope.
