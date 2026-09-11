@@ -6,11 +6,11 @@ import dts from "vite-plugin-dts";
 // Derived from the directory rather than hand-listed: the manual list silently
 // drifted and omitted status, call and system, so those had no deep-import path.
 const moduleEntries = Object.fromEntries(
-  readdirSync(resolve(__dirname, "src/modules"))
+  readdirSync(resolve(import.meta.dirname, "src/modules"))
     .filter((file) => file.endsWith(".ts"))
     .map((file) => [
       `modules/${basename(file, ".ts")}`,
-      resolve(__dirname, "src/modules", file),
+      resolve(import.meta.dirname, "src/modules", file),
     ])
 );
 
@@ -19,7 +19,7 @@ export default defineConfig({
     dts({
       include: ["src/**/*"],
       exclude: ["src/**/*.test.ts", "src/**/*.spec.ts"],
-      outDir: "dist",
+      outDirs: "dist",
       copyDtsFiles: false,
       insertTypesEntry: true,
     }),
@@ -27,11 +27,11 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
-        client: resolve(__dirname, "src/client.ts"),
-        "wuzapi-client": resolve(__dirname, "src/wuzapi-client.ts"),
+        index: resolve(import.meta.dirname, "src/index.ts"),
+        client: resolve(import.meta.dirname, "src/client.ts"),
+        "wuzapi-client": resolve(import.meta.dirname, "src/wuzapi-client.ts"),
         ...moduleEntries,
-        "types/index": resolve(__dirname, "src/types/index.ts"),
+        "types/index": resolve(import.meta.dirname, "src/types/index.ts"),
       },
       formats: ["cjs"],
     },
