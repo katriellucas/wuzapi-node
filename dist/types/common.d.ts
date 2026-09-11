@@ -1,10 +1,25 @@
+export type QueryParams = Record<string, string | number | boolean | undefined | null>;
 export interface WuzapiConfig {
     apiUrl: string;
+    /** User token, sent as the `token` header on every non-admin endpoint. */
     token?: string;
+    /** Admin token, sent as the `Authorization` header on `/admin/*` endpoints. */
+    adminToken?: string;
     debug?: boolean;
 }
 export interface RequestOptions {
+    /**
+     * Overrides the token for this call. The header is still decided by the
+     * endpoint — a user token on user routes, an admin token on `/admin/*`.
+     */
     token?: string;
+    /** Query string parameters appended to the request URL. */
+    params?: QueryParams;
+    /**
+     * Whether to authenticate the request.
+     * Defaults to true. Public endpoints such as `/health` set this to false.
+     */
+    auth?: boolean;
 }
 export interface WuzapiResponse<T = unknown> {
     code: number;
@@ -31,6 +46,13 @@ export interface S3Config {
     publicURL?: string;
     mediaDelivery: "base64" | "s3" | "both";
     retentionDays: number;
+}
+/** Wire shape of `proxy_config` in status-style responses. */
+export interface ProxyConfigResponse {
+    enabled: boolean;
+    proxy_url: string;
+    /** Whether webhook deliveries use the configured proxy. */
+    webhook_use_proxy: boolean;
 }
 export interface S3ConfigResponse {
     access_key: string;

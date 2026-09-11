@@ -1,6 +1,6 @@
 import { BaseClient } from '../client.js';
 import { RequestOptions } from '../types/common.js';
-import { SendMessageResponse, SendTextRequest, SendTemplateRequest, SendAudioRequest, SendImageRequest, SendDocumentRequest, SendVideoRequest, SendStickerRequest, SendLocationRequest, SendContactRequest, ChatPresenceRequest, MarkReadRequest, MarkReadResponse, ReactRequest, DownloadMediaRequest, DownloadMediaResponse, DeleteMessageResponse, SendButtonsRequest, ListSection, GetChatHistoryResponse, RequestUnavailableMessageResponse, ArchiveChatResponse, SendPixRequest } from '../types/chat.js';
+import { SendMessageResponse, SendTextRequest, SendTemplateRequest, SendAudioRequest, SendImageRequest, SendDocumentRequest, SendVideoRequest, SendStickerRequest, SendLocationRequest, SendContactRequest, ChatPresenceRequest, MarkReadRequest, MarkReadResponse, ReactRequest, PinMessageRequest, PinMessageResponse, DownloadMediaRequest, DownloadMediaResponse, DeleteMessageResponse, SendButtonsRequest, ListSection, GetChatHistoryResponse, RequestUnavailableMessageResponse, ArchiveChatResponse, SendPixRequest } from '../types/chat.js';
 export declare class ChatModule extends BaseClient {
     /**
      * Send a text message
@@ -54,6 +54,11 @@ export declare class ChatModule extends BaseClient {
      * React to a message
      */
     react(request: ReactRequest, options?: RequestOptions): Promise<SendMessageResponse>;
+    /**
+     * Pin or unpin a message for all participants.
+     * Pin durations are limited by WhatsApp to 24h, 7d or 30d; defaults to 7d.
+     */
+    pinMessage(request: PinMessageRequest, options?: RequestOptions): Promise<PinMessageResponse>;
     /**
      * Download an image from a message
      */

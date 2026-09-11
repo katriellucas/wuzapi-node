@@ -32,8 +32,12 @@ class UserModule extends client.BaseClient {
    * @param options - Optional per-request options
    */
   async getContacts(params, options) {
-    const query = { saved_only: params?.savedOnly };
-    return this.get("/user/contacts", query, options);
+    return this.get("/user/contacts", {
+      ...options,
+      params: {
+        saved_only: params?.savedOnly
+      }
+    });
   }
   /**
    * Send user presence (available/unavailable status)
@@ -43,12 +47,13 @@ class UserModule extends client.BaseClient {
     return this.post("/user/presence", request, options);
   }
   /**
-   * Subscribe to a contact's presence updates (online/offline status)
+   * Subscribe to a contact's presence updates. Delivered via `Presence` webhooks.
    */
   async subscribePresence(phone, options) {
+    const request = { Phone: phone };
     return this.post(
       "/user/presence/subscribe",
-      { Phone: phone },
+      request,
       options
     );
   }
@@ -58,7 +63,6 @@ class UserModule extends client.BaseClient {
   async getLid(phone, options) {
     return this.get(
       `/user/lid/${encodeURIComponent(phone)}`,
-      void 0,
       options
     );
   }
@@ -66,14 +70,18 @@ class UserModule extends client.BaseClient {
    * Get user privacy settings
    */
   async getPrivacy(options) {
-    return this.get("/user/privacy", void 0, options);
+    return this.get("/user/privacy", options);
   }
   /**
    * Set a user privacy setting
    */
   async setPrivacy(name, value, options) {
     const request = { Name: name, Value: value };
-    return this.post("/user/privacy", request, options);
+    return this.post(
+      "/user/privacy",
+      request,
+      options
+    );
   }
   /**
    * Block a WhatsApp user
@@ -91,7 +99,7 @@ class UserModule extends client.BaseClient {
    * Get the current blocklist
    */
   async getBlocklist(options) {
-    return this.get("/user/blocklist", void 0, options);
+    return this.get("/user/blocklist", options);
   }
 }
 exports.UserModule = UserModule;

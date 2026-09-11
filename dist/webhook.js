@@ -22,6 +22,9 @@ var WebhookEventType = /* @__PURE__ */ ((WebhookEventType2) => {
   WebhookEventType2["STREAM_REPLACED"] = "StreamReplaced";
   WebhookEventType2["PAIR_SUCCESS"] = "PairSuccess";
   WebhookEventType2["PAIR_ERROR"] = "PairError";
+  WebhookEventType2["PASSKEY_REQUEST"] = "PasskeyRequest";
+  WebhookEventType2["PASSKEY_CONFIRMATION"] = "PasskeyConfirmation";
+  WebhookEventType2["PAIR_PASSKEY_ERROR"] = "PairPasskeyError";
   WebhookEventType2["QR"] = "QR";
   WebhookEventType2["QR_SCANNED_WITHOUT_MULTIDEVICE"] = "QRScannedWithoutMultidevice";
   WebhookEventType2["QR_TIMEOUT"] = "QRTimeout";

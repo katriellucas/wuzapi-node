@@ -101,6 +101,13 @@ class ChatModule extends client.BaseClient {
     return this.post("/chat/react", request, options);
   }
   /**
+   * Pin or unpin a message for all participants.
+   * Pin durations are limited by WhatsApp to 24h, 7d or 30d; defaults to 7d.
+   */
+  async pinMessage(request, options) {
+    return this.post("/chat/pin", request, options);
+  }
+  /**
    * Download an image from a message
    */
   async downloadImage(request, options) {
@@ -204,11 +211,13 @@ class ChatModule extends client.BaseClient {
    * Get chat message history
    */
   async getChatHistory(chatJid, params, options) {
-    const query = {
-      chat_jid: chatJid,
-      limit: params?.limit
-    };
-    return this.get("/chat/history", query, options);
+    return this.get("/chat/history", {
+      ...options,
+      params: {
+        chat_jid: chatJid,
+        limit: params?.limit
+      }
+    });
   }
   /**
    * Request a copy of a message that couldn't be decrypted

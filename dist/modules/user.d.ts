@@ -1,6 +1,6 @@
 import { BaseClient } from '../client.js';
 import { RequestOptions } from '../types/common.js';
-import { UserInfoResponse, UserCheckResponse, UserAvatarResponse, ContactsResponse, UserPresenceResponse, UserLidResponse, UserPrivacySettings, PrivacySettingValueMap, UserBlockRequest, UserBlockResponse, UserUnblockResponse, UserBlocklistResponse } from '../types/user.js';
+import { UserInfoResponse, UserCheckResponse, UserAvatarResponse, ContactsResponse, UserPresenceResponse, SubscribePresenceResponse, UserLidResponse, UserPrivacySettings, PrivacySettingValueMap, UserBlockRequest, UserBlockResponse, UserUnblockResponse, UserBlocklistResponse } from '../types/user.js';
 export declare class UserModule extends BaseClient {
     /**
      * Get user details for specified phone numbers
@@ -29,11 +29,9 @@ export declare class UserModule extends BaseClient {
      */
     sendPresence(presenceType: "available" | "unavailable", options?: RequestOptions): Promise<UserPresenceResponse>;
     /**
-     * Subscribe to a contact's presence updates (online/offline status)
+     * Subscribe to a contact's presence updates. Delivered via `Presence` webhooks.
      */
-    subscribePresence(phone: string, options?: RequestOptions): Promise<{
-        Details: string;
-    }>;
+    subscribePresence(phone: string, options?: RequestOptions): Promise<SubscribePresenceResponse>;
     /**
      * Get LID (Linked ID) from phone number or JID
      */

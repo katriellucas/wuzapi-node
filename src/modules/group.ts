@@ -40,7 +40,7 @@ export class GroupModule extends BaseClient {
    * List all subscribed groups
    */
   async list(options?: RequestOptions): Promise<GroupListResponse> {
-    return this.get<GroupListResponse>("/group/list", undefined, options);
+    return this.get<GroupListResponse>("/group/list", options);
   }
 
   /**
@@ -49,13 +49,15 @@ export class GroupModule extends BaseClient {
   async getInviteLink(
     groupJID: string,
     params?: { reset?: boolean },
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupInviteLinkResponse> {
-    const query = {
-      groupJID,
-      reset: params?.reset,
-    };
-    return this.get<GroupInviteLinkResponse>("/group/invitelink", query, options);
+    return this.get<GroupInviteLinkResponse>("/group/invitelink", {
+      ...options,
+      params: {
+        groupJID,
+        reset: params?.reset,
+      },
+    });
   }
 
   /**
@@ -63,10 +65,12 @@ export class GroupModule extends BaseClient {
    */
   async getInfo(
     groupJID: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupInfo> {
-    const query = { groupJID };
-    return this.get<GroupInfo>("/group/info", query, options);
+    return this.get<GroupInfo>("/group/info", {
+      ...options,
+      params: { groupJID },
+    });
   }
 
   /**
@@ -75,7 +79,7 @@ export class GroupModule extends BaseClient {
   async setPhoto(
     groupJID: string,
     image: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupPhotoResponse> {
     const request: GroupPhotoRequest = { GroupJID: groupJID, Image: image };
     return this.post<GroupPhotoResponse>("/group/photo", request, options);
@@ -87,7 +91,7 @@ export class GroupModule extends BaseClient {
   async setName(
     groupJID: string,
     name: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupNameResponse> {
     const request: GroupNameRequest = { GroupJID: groupJID, Name: name };
     return this.post<GroupNameResponse>("/group/name", request, options);
@@ -99,12 +103,13 @@ export class GroupModule extends BaseClient {
   async create(
     name: string,
     participants: string[],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupCreateResponse> {
     const request: GroupCreateRequest = {
       Name: name,
       Participants: participants,
     };
+
     return this.post<GroupCreateResponse>("/group/create", request, options);
   }
 
@@ -114,7 +119,7 @@ export class GroupModule extends BaseClient {
   async setLocked(
     groupJID: string,
     locked: boolean,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupLockedResponse> {
     const request: GroupLockedRequest = { GroupJID: groupJID, Locked: locked };
     return this.post<GroupLockedResponse>("/group/locked", request, options);
@@ -126,16 +131,17 @@ export class GroupModule extends BaseClient {
   async setEphemeral(
     groupJID: string,
     duration: "24h" | "7d" | "90d" | "off",
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupEphemeralResponse> {
     const request: GroupEphemeralRequest = {
       GroupJID: groupJID,
       Duration: duration,
     };
+
     return this.post<GroupEphemeralResponse>(
       "/group/ephemeral",
       request,
-      options
+      options,
     );
   }
 
@@ -144,13 +150,14 @@ export class GroupModule extends BaseClient {
    */
   async removePhoto(
     groupJID: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupPhotoRemoveResponse> {
     const request: GroupPhotoRemoveRequest = { GroupJID: groupJID };
+
     return this.post<GroupPhotoRemoveResponse>(
       "/group/photo/remove",
       request,
-      options
+      options,
     );
   }
 
@@ -159,7 +166,7 @@ export class GroupModule extends BaseClient {
    */
   async leave(
     groupJID: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupLeaveResponse> {
     const request: GroupLeaveRequest = { GroupJID: groupJID };
     return this.post<GroupLeaveResponse>("/group/leave", request, options);
@@ -171,7 +178,7 @@ export class GroupModule extends BaseClient {
   async setTopic(
     groupJID: string,
     topic: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupTopicResponse> {
     const request: GroupTopicRequest = { GroupJID: groupJID, Topic: topic };
     return this.post<GroupTopicResponse>("/group/topic", request, options);
@@ -183,16 +190,17 @@ export class GroupModule extends BaseClient {
   async setAnnounce(
     groupJID: string,
     announce: boolean,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupAnnounceResponse> {
     const request: GroupAnnounceRequest = {
       GroupJID: groupJID,
       Announce: announce,
     };
+
     return this.post<GroupAnnounceResponse>(
       "/group/announce",
       request,
-      options
+      options,
     );
   }
 
@@ -201,7 +209,7 @@ export class GroupModule extends BaseClient {
    */
   async join(
     inviteCode: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupJoinResponse> {
     const request: GroupJoinRequest = { Code: inviteCode };
     return this.post<GroupJoinResponse>("/group/join", request, options);
@@ -212,13 +220,14 @@ export class GroupModule extends BaseClient {
    */
   async getInviteInfo(
     inviteCode: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupInviteInfoResponse> {
     const request: GroupInviteInfoRequest = { Code: inviteCode };
+
     return this.post<GroupInviteInfoResponse>(
       "/group/inviteinfo",
       request,
-      options
+      options,
     );
   }
 
@@ -229,17 +238,18 @@ export class GroupModule extends BaseClient {
     groupJID: string,
     action: "add" | "remove" | "promote" | "demote",
     participants: string[],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupUpdateParticipantsResponse> {
     const request: GroupUpdateParticipantsRequest = {
       GroupJID: groupJID,
       Action: action,
       Participants: participants,
     };
+
     return this.post<GroupUpdateParticipantsResponse>(
       "/group/updateparticipants",
       request,
-      options
+      options,
     );
   }
 
@@ -248,13 +258,14 @@ export class GroupModule extends BaseClient {
    */
   async getRequestParticipants(
     groupJID: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GroupRequestParticipantsResponse> {
-    const query = { groupJID };
     return this.get<GroupRequestParticipantsResponse>(
       "/group/requestparticipants",
-      query,
-      options
+      {
+        ...options,
+        params: { groupJID },
+      },
     );
   }
 
@@ -265,17 +276,18 @@ export class GroupModule extends BaseClient {
     groupJID: string,
     action: "approve" | "reject",
     phones: string[],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UpdateGroupRequestParticipantsResponse> {
     const request: UpdateGroupRequestParticipantsRequest = {
       GroupJID: groupJID,
       Action: action,
       Phone: phones,
     };
+
     return this.post<UpdateGroupRequestParticipantsResponse>(
       "/group/updaterequestparticipants",
       request,
-      options
+      options,
     );
   }
 
@@ -285,16 +297,17 @@ export class GroupModule extends BaseClient {
   async setJoinApprovalMode(
     groupJID: string,
     mode: boolean,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SetGroupJoinApprovalModeResponse> {
     const request: SetGroupJoinApprovalModeRequest = {
       groupjid: groupJID,
-      mode: mode,
+      mode,
     };
+
     return this.post<SetGroupJoinApprovalModeResponse>(
       "/group/joinapprovalmode",
       request,
-      options
+      options,
     );
   }
 }

@@ -1,35 +1,21 @@
-import { BaseClient, WuzapiError } from "../client.js";
+import { BaseClient } from "../client.js";
 import type { HealthResponse } from "../types/system.js";
+import type { RequestOptions } from "../types/common.js";
 
 export class SystemModule extends BaseClient {
   /**
    * Health check
    * Endpoint to verify if the API is running correctly and retrieve service statistics.
    */
-  async getHealth(): Promise<HealthResponse> {
-    const url = this.buildUrl("/health");
-
-    let response: Response;
-
-    try {
-      response = await fetch(url);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to connect to WuzAPI";
-
-      throw new WuzapiError(0, `Network error: ${message}`);
-    }
-
-    const data = (await response.json().catch(() => ({}))) as HealthResponse;
-
-    if (!response.ok) {
-      throw new WuzapiError(
-        response.status,
-        `API request failed with status ${response.status}`,
-        data,
-      );
-    }
-
-    return data;
+  async getHealth(options?: RequestOptions): Promise<HealthResponse> {
+    return this.requestRaw<HealthResponse>(
+      "GET",
+      "/health",
+      undefined,
+      {
+        ...options,
+        auth: false,
+      },
+    );
   }
 }

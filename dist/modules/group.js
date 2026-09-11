@@ -6,24 +6,28 @@ class GroupModule extends client.BaseClient {
    * List all subscribed groups
    */
   async list(options) {
-    return this.get("/group/list", void 0, options);
+    return this.get("/group/list", options);
   }
   /**
    * Get group invite link
    */
   async getInviteLink(groupJID, params, options) {
-    const query = {
-      groupJID,
-      reset: params?.reset
-    };
-    return this.get("/group/invitelink", query, options);
+    return this.get("/group/invitelink", {
+      ...options,
+      params: {
+        groupJID,
+        reset: params?.reset
+      }
+    });
   }
   /**
    * Get group information
    */
   async getInfo(groupJID, options) {
-    const query = { groupJID };
-    return this.get("/group/info", query, options);
+    return this.get("/group/info", {
+      ...options,
+      params: { groupJID }
+    });
   }
   /**
    * Change group photo (JPEG only)
@@ -146,11 +150,12 @@ class GroupModule extends client.BaseClient {
    * List participants who have requested to join the group
    */
   async getRequestParticipants(groupJID, options) {
-    const query = { groupJID };
     return this.get(
       "/group/requestparticipants",
-      query,
-      options
+      {
+        ...options,
+        params: { groupJID }
+      }
     );
   }
   /**

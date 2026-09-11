@@ -2,6 +2,8 @@ import { BaseClient } from '../client.js';
 import { RequestOptions } from '../types/common.js';
 import { User, CreateUserRequest, CreateUserResponse, DeleteUserResponse, UpdateUserRequest, UpdateUserResponse } from '../types/admin.js';
 export declare class AdminModule extends BaseClient {
+    /** `/admin/*` authenticates with the server's admin token via `Authorization`. */
+    protected readonly authScheme: "admin";
     /**
      * List all users
      */

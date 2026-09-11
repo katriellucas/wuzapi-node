@@ -2,17 +2,19 @@
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const client = require("../client.js");
 class AdminModule extends client.BaseClient {
+  /** `/admin/*` authenticates with the server's admin token via `Authorization`. */
+  authScheme = "admin";
   /**
    * List all users
    */
   async listUsers(options) {
-    return this.get("/admin/users", void 0, options);
+    return this.get("/admin/users", options);
   }
   /**
    * Get a user by ID
    */
   async getUser(id, options) {
-    return this.get(`/admin/users/${id}`, void 0, options);
+    return this.get(`/admin/users/${id}`, options);
   }
   /**
    * Add a new user
@@ -36,7 +38,10 @@ class AdminModule extends client.BaseClient {
    * Delete a user completely (full deletion) by ID
    */
   async deleteUserComplete(id, options) {
-    return this.delete(`/admin/users/${id}/full`, options);
+    return this.delete(
+      `/admin/users/${id}/full`,
+      options
+    );
   }
 }
 exports.AdminModule = AdminModule;

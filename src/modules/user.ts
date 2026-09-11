@@ -56,6 +56,7 @@ export class UserModule extends BaseClient {
       Phone: phone,
       Preview: params?.preview ?? true,
     };
+
     return this.post<UserAvatarResponse>("/user/avatar", request, options);
   }
 
@@ -68,8 +69,12 @@ export class UserModule extends BaseClient {
     params?: { savedOnly?: boolean },
     options?: RequestOptions,
   ): Promise<ContactsResponse> {
-    const query = { saved_only: params?.savedOnly };
-    return this.get<ContactsResponse>("/user/contacts", query, options);
+    return this.get<ContactsResponse>("/user/contacts", {
+      ...options,
+      params: {
+        saved_only: params?.savedOnly,
+      },
+    });
   }
 
   /**
@@ -91,6 +96,7 @@ export class UserModule extends BaseClient {
     options?: RequestOptions,
   ): Promise<SubscribePresenceResponse> {
     const request: SubscribePresenceRequest = { Phone: phone };
+
     return this.post<SubscribePresenceResponse>(
       "/user/presence/subscribe",
       request,
@@ -107,7 +113,6 @@ export class UserModule extends BaseClient {
   ): Promise<UserLidResponse> {
     return this.get<UserLidResponse>(
       `/user/lid/${encodeURIComponent(phone)}`,
-      undefined,
       options,
     );
   }
@@ -116,7 +121,7 @@ export class UserModule extends BaseClient {
    * Get user privacy settings
    */
   async getPrivacy(options?: RequestOptions): Promise<UserPrivacySettings> {
-    return this.get<UserPrivacySettings>("/user/privacy", undefined, options);
+    return this.get<UserPrivacySettings>("/user/privacy", options);
   }
 
   /**
@@ -128,6 +133,7 @@ export class UserModule extends BaseClient {
     options?: RequestOptions,
   ): Promise<Partial<UserPrivacySettings>> {
     const request = { Name: name, Value: value };
+
     return this.post<Partial<UserPrivacySettings>>(
       "/user/privacy",
       request,
@@ -159,10 +165,6 @@ export class UserModule extends BaseClient {
    * Get the current blocklist
    */
   async getBlocklist(options?: RequestOptions): Promise<UserBlocklistResponse> {
-    return this.get<UserBlocklistResponse>(
-      "/user/blocklist",
-      undefined,
-      options,
-    );
+    return this.get<UserBlocklistResponse>("/user/blocklist", options);
   }
 }

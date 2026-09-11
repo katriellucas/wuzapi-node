@@ -1,3 +1,4 @@
+import { PasskeyChallenge } from './session.js';
 import { VerifiedName } from './user.js';
 export declare enum WebhookEventType {
     MESSAGE = "Message",
@@ -22,6 +23,9 @@ export declare enum WebhookEventType {
     STREAM_REPLACED = "StreamReplaced",
     PAIR_SUCCESS = "PairSuccess",
     PAIR_ERROR = "PairError",
+    PASSKEY_REQUEST = "PasskeyRequest",
+    PASSKEY_CONFIRMATION = "PasskeyConfirmation",
+    PAIR_PASSKEY_ERROR = "PairPasskeyError",
     QR = "QR",
     QR_SCANNED_WITHOUT_MULTIDEVICE = "QRScannedWithoutMultidevice",
     QR_TIMEOUT = "QRTimeout",
@@ -52,7 +56,11 @@ export declare enum WebhookEventType {
 export declare const WEBHOOK_EVENTS: WebhookEventType[];
 export type WebhookEvent = keyof typeof WebhookEventType;
 export interface SetWebhookRequest {
-    webhook: string;
+    /**
+     * Webhook URL. Decoded from the `webhookurl` key by current WuzAPI
+     * servers — older servers read `webhook`.
+     */
+    webhookurl: string;
     events: (WebhookEvent | string)[];
 }
 export interface SetWebhookResponse {
@@ -66,7 +74,7 @@ export interface GetWebhookResponse {
 export interface UpdateWebhookRequest {
     webhook?: string;
     events?: (WebhookEvent | string)[];
-    Active?: boolean;
+    active?: boolean;
 }
 export interface UpdateWebhookResponse {
     WebhookURL: string;
@@ -501,6 +509,28 @@ export interface MessageWebhookEvent {
     SourceWebMsg: unknown | null;
     UnavailableRequestID: string;
 }
+export interface PresenceWebhookEvent {
+    /** JID of the contact whose presence changed. */
+    from: string;
+    state: "online" | "offline";
+    /**
+     * Unix timestamp of the contact's last seen. Only present when the
+     * contact went offline and WhatsApp reported a timestamp.
+     */
+    last_seen?: number;
+}
+export interface PasskeyRequestWebhookEvent {
+    publicKey: PasskeyChallenge;
+}
+export interface PasskeyConfirmationWebhookEvent {
+    code: string;
+    skipHandoffUX: boolean;
+}
+export interface PairPasskeyErrorWebhookEvent {
+    error: string;
+    /** Whether the pairing ceremony can continue with another method. */
+    continuation: boolean;
+}
 export type QRWebhookPayload = AnyWebhookPayload<QRWebhookEvent> & {
     qrCodeBase64: string;
 };
@@ -509,6 +539,10 @@ export type ConnectedWebhookPayload = AnyWebhookPayload<ConnectedWebhookEvent>;
 export type ReadReceiptWebhookPayload = AnyWebhookPayload<ReadReceiptWebhookEvent>;
 export type HistorySyncWebhookPayload = AnyWebhookPayload<HistorySyncWebhookEvent>;
 export type MessageWebhookPayload = AnyWebhookPayload<MessageWebhookEvent>;
+export type PresenceWebhookPayload = AnyWebhookPayload<PresenceWebhookEvent>;
+export type PasskeyRequestWebhookPayload = AnyWebhookPayload<PasskeyRequestWebhookEvent>;
+export type PasskeyConfirmationWebhookPayload = AnyWebhookPayload<PasskeyConfirmationWebhookEvent>;
+export type PairPasskeyErrorWebhookPayload = AnyWebhookPayload<PairPasskeyErrorWebhookEvent>;
 export interface WebhookEventMap {
     QR: QRWebhookEvent;
     QRTimeout: QRTimeoutWebhookEvent;
@@ -516,9 +550,13 @@ export interface WebhookEventMap {
     ReadReceipt: ReadReceiptWebhookEvent;
     HistorySync: HistorySyncWebhookEvent;
     Message: MessageWebhookEvent;
+    Presence: PresenceWebhookEvent;
+    PasskeyRequest: PasskeyRequestWebhookEvent;
+    PasskeyConfirmation: PasskeyConfirmationWebhookEvent;
+    PairPasskeyError: PairPasskeyErrorWebhookEvent;
 }
 export type WebhookEventHandler<T extends keyof WebhookEventMap> = (payload: AnyWebhookPayload<WebhookEventMap[T]>) => void | Promise<void>;
-export type SpecificWebhookPayload = QRWebhookPayload | QRTimeoutWebhookPayload | ConnectedWebhookPayload | ReadReceiptWebhookPayload | HistorySyncWebhookPayload | MessageWebhookPayload;
+export type SpecificWebhookPayload = QRWebhookPayload | QRTimeoutWebhookPayload | ConnectedWebhookPayload | ReadReceiptWebhookPayload | HistorySyncWebhookPayload | MessageWebhookPayload | PresenceWebhookPayload | PasskeyRequestWebhookPayload | PasskeyConfirmationWebhookPayload | PairPasskeyErrorWebhookPayload;
 export declare function isWebhookEventType<T extends keyof WebhookEventMap>(payload: WebhookPayloadBase, eventType: T): payload is AnyWebhookPayload<WebhookEventMap[T]>;
 export declare function hasS3Media(payload: WebhookPayloadBase): payload is S3OnlyWebhookPayload | BothMediaWebhookPayload;
 export declare function hasBase64Media(payload: WebhookPayloadBase): payload is Base64OnlyWebhookPayload | BothMediaWebhookPayload;

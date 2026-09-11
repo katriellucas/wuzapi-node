@@ -1,5 +1,5 @@
 import { BaseClient } from '../client.js';
-import { ConnectRequest, ConnectResponse, DisconnectResponse, LogoutResponse, StatusResponse, QRCodeResponse, S3TestResponse, PairPhoneResponse, HistoryResponse, ProxyResponse, HistoryCountResponse, HmacConfigResponse, HmacDeleteResponse, PasskeyStatusResponse } from '../types/session.js';
+import { ConnectRequest, ConnectResponse, DisconnectResponse, LogoutResponse, StatusResponse, QRCodeResponse, S3TestResponse, PairPhoneResponse, HistoryResponse, ProxyResponse, HistoryCountResponse, HmacConfigResponse, HmacDeleteResponse, PasskeyStatusResponse, PasskeyResponseRequest, PasskeyResponseResult, PasskeyConfirmResult } from '../types/session.js';
 import { S3Config, RequestOptions, S3ConfigResponse } from '../types/common.js';
 export declare class SessionModule extends BaseClient {
     /**
@@ -7,9 +7,10 @@ export declare class SessionModule extends BaseClient {
      */
     connect(request: ConnectRequest, options?: RequestOptions): Promise<ConnectResponse>;
     /**
-     * Disconnect from WhatsApp servers
+     * Disconnect from WhatsApp servers.
+     * @param clear also clear the stored event subscriptions (the server keeps them by default)
      */
-    disconnect(options?: RequestOptions): Promise<DisconnectResponse>;
+    disconnect(clear?: boolean, options?: RequestOptions): Promise<DisconnectResponse>;
     /**
      * Logout and finish the session
      */
@@ -45,6 +46,21 @@ export declare class SessionModule extends BaseClient {
      */
     pairPhone(phone: string, options?: RequestOptions): Promise<PairPhoneResponse>;
     /**
+     * Get pending passkey pairing status. Returns the WebAuthn challenge when
+     * the device initiated passkey pairing instead of QR.
+     */
+    getPasskeyStatus(options?: RequestOptions): Promise<PasskeyStatusResponse>;
+    /**
+     * Complete passkey pairing by sending the WebAuthn response from the
+     * authenticator, after receiving a `PasskeyRequest` webhook.
+     */
+    sendPasskeyResponse(request: PasskeyResponseRequest, options?: RequestOptions): Promise<PasskeyResponseResult>;
+    /**
+     * Confirm that the 8-character pairing code was displayed to the user and
+     * matches the phone, after receiving a `PasskeyConfirmation` webhook.
+     */
+    confirmPasskey(options?: RequestOptions): Promise<PasskeyConfirmResult>;
+    /**
      * Request history sync from WhatsApp servers
      */
     requestHistory(options?: RequestOptions): Promise<HistoryResponse>;
@@ -54,8 +70,9 @@ export declare class SessionModule extends BaseClient {
     setHistoryCount(history: number, options?: RequestOptions): Promise<HistoryCountResponse>;
     /**
      * Set proxy configuration
+     * @param webhookUseProxy route webhook deliveries through this proxy; omitted preserves the current per-user value
      */
-    setProxy(proxyURL: string, enable?: boolean, options?: RequestOptions): Promise<ProxyResponse>;
+    setProxy(proxyURL: string, enable?: boolean, webhookUseProxy?: boolean, options?: RequestOptions): Promise<ProxyResponse>;
     /**
      * Configure HMAC key for webhook signing
      */
@@ -68,8 +85,4 @@ export declare class SessionModule extends BaseClient {
      * Delete HMAC configuration
      */
     deleteHmacConfig(options?: RequestOptions): Promise<HmacDeleteResponse>;
-    /**
-     * Get passkey status
-     */
-    getPasskeyStatus(options?: RequestOptions): Promise<PasskeyStatusResponse>;
 }

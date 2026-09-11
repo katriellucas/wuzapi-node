@@ -2,12 +2,11 @@ import type {
   WuzapiConfig,
   WuzapiResponse,
   RequestOptions,
+  QueryParams,
 } from "./types/common.js";
 import { logger } from "./utils/logger.js";
 
 type HttpMethod = "GET" | "POST" | "DELETE" | "PUT";
-
-type QueryParams = Record<string, string | number | boolean | undefined | null>;
 
 /**
  * WuzAPI reports a failure reason in `error`, or occasionally as a bare string
@@ -50,9 +49,13 @@ export class BaseClient {
   constructor(protected config: WuzapiConfig) {}
 
   /**
-   * Build the auth header the endpoint requires.
+   * Build the headers required by the request.
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
+    if (options?.auth === false) {
+      return { ...this.defaultHeaders };
+    }
+
     const isAdmin = this.authScheme === "admin";
 
     const token =
@@ -91,17 +94,17 @@ export class BaseClient {
   }
 
   /**
-   * Execute an authenticated WuzAPI request and unwrap its `.data` envelope.
+   * Execute an HTTP request and return its parsed response body without
+   * interpreting it as a WuzAPI response envelope.
    */
-  protected async request<T>(
+  protected async requestRaw<T>(
     method: HttpMethod,
     endpoint: string,
-    params?: QueryParams,
     data?: unknown,
     options?: RequestOptions,
   ): Promise<T> {
     const headers = this.buildHeaders(options);
-    const url = this.buildUrl(endpoint, params);
+    const url = this.buildUrl(endpoint, options?.params);
 
     if (this.config.debug) {
       logger.request(`[${method}] ${url.pathname}${url.search}`, {
@@ -125,7 +128,7 @@ export class BaseClient {
       throw new WuzapiError(0, `Network error: ${message}`);
     }
 
-    const json = (await response.json().catch(() => ({}))) as WuzapiResponse<T>;
+    const json = (await response.json().catch(() => ({}))) as unknown;
 
     if (this.config.debug) {
       logger.response(`[${method}] ${url.pathname}${url.search}`, {
@@ -145,6 +148,26 @@ export class BaseClient {
       );
     }
 
+    return json as T;
+  }
+
+  /**
+   * Execute a WuzAPI request, validate its response envelope, and unwrap
+   * its `.data` value.
+   */
+  protected async request<T>(
+    method: HttpMethod,
+    endpoint: string,
+    data?: unknown,
+    options?: RequestOptions,
+  ): Promise<T> {
+    const json = await this.requestRaw<WuzapiResponse<T>>(
+      method,
+      endpoint,
+      data,
+      options,
+    );
+
     const invalidCode =
       typeof json.code === "number" && (json.code < 200 || json.code >= 300);
 
@@ -161,10 +184,9 @@ export class BaseClient {
 
   protected get<T>(
     endpoint: string,
-    params?: QueryParams,
     options?: RequestOptions,
   ): Promise<T> {
-    return this.request<T>("GET", endpoint, params, undefined, options);
+    return this.request<T>("GET", endpoint, undefined, options);
   }
 
   protected post<T>(
@@ -172,7 +194,7 @@ export class BaseClient {
     data?: unknown,
     options?: RequestOptions,
   ): Promise<T> {
-    return this.request<T>("POST", endpoint, undefined, data, options);
+    return this.request<T>("POST", endpoint, data, options);
   }
 
   protected put<T>(
@@ -180,10 +202,10 @@ export class BaseClient {
     data?: unknown,
     options?: RequestOptions,
   ): Promise<T> {
-    return this.request<T>("PUT", endpoint, undefined, data, options);
+    return this.request<T>("PUT", endpoint, data, options);
   }
 
   protected delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
-    return this.request<T>("DELETE", endpoint, undefined, undefined, options);
+    return this.request<T>("DELETE", endpoint, undefined, options);
   }
 }

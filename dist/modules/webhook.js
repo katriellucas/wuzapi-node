@@ -7,14 +7,14 @@ class WebhookModule extends client.BaseClient {
    * Set webhook URL and events to subscribe to
    */
   async setWebhook(webhookURL, events = ["All"], options) {
-    const request = { webhook: webhookURL, events };
+    const request = { webhookurl: webhookURL, events };
     return this.post("/webhook", request, options);
   }
   /**
    * Get current webhook configuration
    */
   async getWebhook(options) {
-    return this.get("/webhook", void 0, options);
+    return this.get("/webhook", options);
   }
   /**
    * Update webhook URL, events, and activation status
@@ -23,7 +23,7 @@ class WebhookModule extends client.BaseClient {
     const request = {
       webhook: webhookURL,
       events,
-      Active: active
+      active
     };
     return this.put("/webhook", request, options);
   }

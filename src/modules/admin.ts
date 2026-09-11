@@ -17,14 +17,14 @@ export class AdminModule extends BaseClient {
    * List all users
    */
   async listUsers(options?: RequestOptions): Promise<User[]> {
-    return this.get<User[]>("/admin/users", undefined, options);
+    return this.get<User[]>("/admin/users", options);
   }
 
   /**
    * Get a user by ID
    */
   async getUser(id: string, options?: RequestOptions): Promise<User> {
-    return this.get<User>(`/admin/users/${id}`, undefined, options);
+    return this.get<User>(`/admin/users/${id}`, options);
   }
 
   /**
@@ -32,7 +32,7 @@ export class AdminModule extends BaseClient {
    */
   async addUser(
     user: CreateUserRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<CreateUserResponse> {
     return this.post<CreateUserResponse>("/admin/users", user, options);
   }
@@ -43,7 +43,7 @@ export class AdminModule extends BaseClient {
   async updateUser(
     id: string,
     user: UpdateUserRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<UpdateUserResponse> {
     return this.put<UpdateUserResponse>(`/admin/users/${id}`, user, options);
   }
@@ -53,7 +53,7 @@ export class AdminModule extends BaseClient {
    */
   async deleteUser(
     id: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DeleteUserResponse> {
     return this.delete<DeleteUserResponse>(`/admin/users/${id}`, options);
   }
@@ -63,8 +63,11 @@ export class AdminModule extends BaseClient {
    */
   async deleteUserComplete(
     id: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DeleteUserResponse> {
-    return this.delete<DeleteUserResponse>(`/admin/users/${id}/full`, options);
+    return this.delete<DeleteUserResponse>(
+      `/admin/users/${id}/full`,
+      options,
+    );
   }
 }

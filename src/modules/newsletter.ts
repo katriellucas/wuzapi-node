@@ -7,6 +7,6 @@ export class NewsletterModule extends BaseClient {
    * List all subscribed newsletters
    */
   async list(options?: RequestOptions): Promise<NewsletterListResponse> {
-    return this.get<NewsletterListResponse>("/newsletter/list", undefined, options);
+    return this.get<NewsletterListResponse>("/newsletter/list", options);
   }
 }

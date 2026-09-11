@@ -1,5 +1,10 @@
 // Common types used across all API modules
 
+export type QueryParams = Record<
+  string,
+  string | number | boolean | undefined | null
+>;
+
 export interface WuzapiConfig {
   apiUrl: string;
   /** User token, sent as the `token` header on every non-admin endpoint. */
@@ -15,6 +20,15 @@ export interface RequestOptions {
    * endpoint — a user token on user routes, an admin token on `/admin/*`.
    */
   token?: string;
+
+  /** Query string parameters appended to the request URL. */
+  params?: QueryParams;
+
+  /**
+   * Whether to authenticate the request.
+   * Defaults to true. Public endpoints such as `/health` set this to false.
+   */
+  auth?: boolean;
 }
 
 export interface WuzapiResponse<T = unknown> {

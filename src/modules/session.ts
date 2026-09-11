@@ -50,6 +50,7 @@ export class SessionModule extends BaseClient {
     const path = clear
       ? "/session/disconnect?clear=true"
       : "/session/disconnect";
+
     return this.post<DisconnectResponse>(path, undefined, options);
   }
 
@@ -64,14 +65,14 @@ export class SessionModule extends BaseClient {
    * Get session status
    */
   async getStatus(options?: RequestOptions): Promise<StatusResponse> {
-    return this.get<StatusResponse>("/session/status", undefined, options);
+    return this.get<StatusResponse>("/session/status", options);
   }
 
   /**
    * Get QR code for scanning
    */
   async getQRCode(options?: RequestOptions): Promise<QRCodeResponse> {
-    return this.get<QRCodeResponse>("/session/qr", undefined, options);
+    return this.get<QRCodeResponse>("/session/qr", options);
   }
 
   /**
@@ -88,7 +89,7 @@ export class SessionModule extends BaseClient {
    * Get S3 configuration
    */
   async getS3Config(options?: RequestOptions): Promise<S3ConfigResponse> {
-    return this.get<S3ConfigResponse>("/session/s3/config", undefined, options);
+    return this.get<S3ConfigResponse>("/session/s3/config", options);
   }
 
   /**
@@ -123,11 +124,7 @@ export class SessionModule extends BaseClient {
   async getPasskeyStatus(
     options?: RequestOptions,
   ): Promise<PasskeyStatusResponse> {
-    return this.get<PasskeyStatusResponse>(
-      "/session/passkey-status",
-      undefined,
-      options,
-    );
+    return this.get<PasskeyStatusResponse>("/session/passkey-status", options);
   }
 
   /**
@@ -163,7 +160,7 @@ export class SessionModule extends BaseClient {
    * Request history sync from WhatsApp servers
    */
   async requestHistory(options?: RequestOptions): Promise<HistoryResponse> {
-    return this.get<HistoryResponse>("/session/history", undefined, options);
+    return this.get<HistoryResponse>("/session/history", options);
   }
 
   /**
@@ -174,6 +171,7 @@ export class SessionModule extends BaseClient {
     options?: RequestOptions,
   ): Promise<HistoryCountResponse> {
     const request: HistoryCountRequest = { history };
+
     return this.post<HistoryCountResponse>(
       "/session/history",
       request,
@@ -198,6 +196,7 @@ export class SessionModule extends BaseClient {
         webhook_use_proxy: webhookUseProxy,
       }),
     };
+
     return this.post<ProxyResponse>("/session/proxy", request, options);
   }
 
@@ -209,6 +208,7 @@ export class SessionModule extends BaseClient {
     options?: RequestOptions,
   ): Promise<HmacConfigResponse> {
     const request: HmacConfigRequest = { hmac_key: hmacKey };
+
     return this.post<HmacConfigResponse>(
       "/session/hmac/config",
       request,
@@ -220,11 +220,7 @@ export class SessionModule extends BaseClient {
    * Get HMAC configuration status
    */
   async getHmacConfig(options?: RequestOptions): Promise<HmacConfigResponse> {
-    return this.get<HmacConfigResponse>(
-      "/session/hmac/config",
-      undefined,
-      options,
-    );
+    return this.get<HmacConfigResponse>("/session/hmac/config", options);
   }
 
   /**

@@ -479,128 +479,145 @@ const logger = {
   error: debug("wuzapi:error"),
   info: debug("wuzapi:info")
 };
+function resolveErrorMessage(body, fallback) {
+  if (typeof body !== "object" || body === null) return fallback;
+  const { error, message, data } = body;
+  if (typeof error === "string") return error;
+  if (typeof message === "string") return message;
+  if (typeof data === "string") return data;
+  return fallback;
+}
 class WuzapiError extends Error {
-  code;
-  details;
   constructor(code, message, details) {
     super(message);
-    this.name = "WuzapiError";
     this.code = code;
     this.details = details;
+    this.name = "WuzapiError";
   }
+  code;
+  details;
 }
 class BaseClient {
+  constructor(config) {
+    this.config = config;
+  }
   config;
   defaultHeaders = {
     "Content-Type": "application/json"
   };
-  constructor(config) {
-    this.config = config;
-  }
   /**
-   * Resolve headers with authentication token
+   * Which credential this module's endpoints authenticate with. Overridden to
+   * `"admin"` by `AdminModule`; every other module is on user auth.
+   */
+  authScheme = "user";
+  /**
+   * Build the headers required by the request.
    */
   buildHeaders(options) {
-    const token = options?.token || this.config.token;
+    if (options?.auth === false) {
+      return { ...this.defaultHeaders };
+    }
+    const isAdmin = this.authScheme === "admin";
+    const token = options?.token ?? (isAdmin ? this.config.adminToken : this.config.token);
     if (!token) {
       throw new WuzapiError(
         401,
-        "No authentication token provided. Either set a token in the client config or provide one in the request options."
+        isAdmin ? "No admin token provided. Set `adminToken` in the client config, or pass `{ token }` in the request options." : "No user token provided. Set `token` in the client config, or pass `{ token }` in the request options."
       );
     }
     return {
       ...this.defaultHeaders,
-      Authorization: token,
-      Token: token
+      [isAdmin ? "Authorization" : "token"]: token
     };
   }
   /**
-   * Builds a full URL object using the native Web URL API
+   * Builds a full URL using the native URL API.
    */
   buildUrl(endpoint, params) {
-    const fullUrl = `${this.config.apiUrl}/${endpoint}`.replace(/([^:]\/)\/+/g, "$1");
-    const url = new URL(fullUrl);
+    const url = new URL(
+      `${this.config.apiUrl}/${endpoint}`.replace(/([^:]\/)\/+/g, "$1")
+    );
     for (const [key, value] of Object.entries(params ?? {})) {
-      if (value != null && value !== "") {
-        url.searchParams.set(key, String(value));
-      }
+      if (value == null || value === "") continue;
+      url.searchParams.set(key, String(value));
     }
     return url;
   }
   /**
-   * Low-level HTTP execution with native fetch.
-   * Parses JSON and handles HTTP errors, returning the raw response body.
+   * Execute an HTTP request and return its parsed response body without
+   * interpreting it as a WuzAPI response envelope.
    */
-  async requestRaw(method, endpoint, params, data, options) {
+  async requestRaw(method, endpoint, data, options) {
     const headers = this.buildHeaders(options);
-    const url = this.buildUrl(endpoint, params);
+    const url = this.buildUrl(endpoint, options?.params);
     if (this.config.debug) {
-      logger.request(`[${method}] ${url.pathname}${url.search}`, { headers, data });
+      logger.request(`[${method}] ${url.pathname}${url.search}`, {
+        headers,
+        data
+      });
     }
-    let res;
+    let response;
     try {
-      res = await fetch(url, {
+      response = await fetch(url, {
         method,
         headers,
-        body: data ? JSON.stringify(data) : void 0
+        body: data === void 0 ? void 0 : JSON.stringify(data)
       });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to connect to WuzAPI";
-      throw new WuzapiError(0, `Network error: ${errorMessage}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to connect to WuzAPI";
+      throw new WuzapiError(0, `Network error: ${message}`);
     }
-    const json = await res.json().catch(() => ({}));
+    const json = await response.json().catch(() => ({}));
     if (this.config.debug) {
       logger.response(`[${method}] ${url.pathname}${url.search}`, {
-        status: res.status,
+        status: response.status,
         data: json
       });
     }
-    if (!res.ok) {
-      let errorMessage = `API request failed with status ${res.status}`;
-      if (typeof json.error === "string" && json.error) {
-        errorMessage = json.error;
-      } else if (typeof json.message === "string" && json.message) {
-        errorMessage = json.message;
-      }
-      throw new WuzapiError(res.status, errorMessage, json);
+    if (!response.ok) {
+      throw new WuzapiError(
+        response.status,
+        resolveErrorMessage(
+          json,
+          `API request failed with status ${response.status}`
+        ),
+        json
+      );
     }
     return json;
   }
   /**
-   * High-level WuzAPI request wrapper.
-   * Calls requestRaw and unwraps the WuzAPI `.data` envelope.
+   * Execute a WuzAPI request, validate its response envelope, and unwrap
+   * its `.data` value.
    */
-  async request(method, endpoint, params, data, options) {
+  async request(method, endpoint, data, options) {
     const json = await this.requestRaw(
       method,
       endpoint,
-      params,
       data,
       options
     );
-    if (json.success === false) {
+    const invalidCode = typeof json.code === "number" && (json.code < 200 || json.code >= 300);
+    if (!json.success || invalidCode) {
       throw new WuzapiError(
-        json.code || 500,
-        json.error || "API request failed",
+        json.code ?? 500,
+        resolveErrorMessage(json, "API request failed"),
         json
       );
     }
     return json.data;
   }
-  async get(endpoint, params, options) {
-    return this.request("GET", endpoint, params, void 0, options);
+  get(endpoint, options) {
+    return this.request("GET", endpoint, void 0, options);
   }
-  async getRaw(endpoint, params, options) {
-    return this.requestRaw("GET", endpoint, params, void 0, options);
+  post(endpoint, data, options) {
+    return this.request("POST", endpoint, data, options);
   }
-  async post(endpoint, data, options) {
-    return this.request("POST", endpoint, void 0, data, options);
+  put(endpoint, data, options) {
+    return this.request("PUT", endpoint, data, options);
   }
-  async put(endpoint, data, options) {
-    return this.request("PUT", endpoint, void 0, data, options);
-  }
-  async delete(endpoint, options) {
-    return this.request("DELETE", endpoint, void 0, void 0, options);
+  delete(endpoint, options) {
+    return this.request("DELETE", endpoint, void 0, options);
   }
 }
 exports.BaseClient = BaseClient;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperties(exports, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
-const wuzapiClient = require("./wuzapi-client2.js");
+const wuzapiClient = require("./wuzapi-client.js");
 const client = require("./client.js");
 const webhook = require("./webhook.js");
 const types_index = require("./types/index.js");
@@ -11,9 +11,9 @@ const modules_chat = require("./modules/chat.js");
 const modules_group = require("./modules/group.js");
 const modules_webhook = require("./modules/webhook.js");
 const modules_newsletter = require("./modules/newsletter.js");
-exports.CallModule = wuzapiClient.CallModule;
-exports.StatusModule = wuzapiClient.StatusModule;
-exports.SystemModule = wuzapiClient.SystemModule;
+const modules_status = require("./modules/status.js");
+const modules_call = require("./modules/call.js");
+const modules_system = require("./modules/system.js");
 exports.WuzapiClient = wuzapiClient.WuzapiClient;
 exports.default = wuzapiClient.WuzapiClient;
 exports.WuzapiError = client.WuzapiError;
@@ -62,4 +62,7 @@ exports.ChatModule = modules_chat.ChatModule;
 exports.GroupModule = modules_group.GroupModule;
 exports.WebhookModule = modules_webhook.WebhookModule;
 exports.NewsletterModule = modules_newsletter.NewsletterModule;
+exports.StatusModule = modules_status.StatusModule;
+exports.CallModule = modules_call.CallModule;
+exports.SystemModule = modules_system.SystemModule;
 //# sourceMappingURL=index.js.map

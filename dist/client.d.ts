@@ -1,34 +1,40 @@
-import { WuzapiConfig, RequestOptions } from './types/common.js';
+import { WuzapiConfig, RequestOptions, QueryParams } from './types/common.js';
+type HttpMethod = "GET" | "POST" | "DELETE" | "PUT";
 export declare class WuzapiError extends Error {
     code: number;
-    details?: unknown;
-    constructor(code: number, message: string, details?: unknown);
+    details?: unknown | undefined;
+    constructor(code: number, message: string, details?: unknown | undefined);
 }
 export declare class BaseClient {
     protected config: WuzapiConfig;
-    protected defaultHeaders: Record<string, string>;
+    private readonly defaultHeaders;
+    /**
+     * Which credential this module's endpoints authenticate with. Overridden to
+     * `"admin"` by `AdminModule`; every other module is on user auth.
+     */
+    protected readonly authScheme: "user" | "admin";
     constructor(config: WuzapiConfig);
     /**
-     * Resolve headers with authentication token
+     * Build the headers required by the request.
      */
     private buildHeaders;
     /**
-     * Builds a full URL object using the native Web URL API
+     * Builds a full URL using the native URL API.
      */
-    protected buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined | null>): URL;
+    protected buildUrl(endpoint: string, params?: QueryParams): URL;
     /**
-     * Low-level HTTP execution with native fetch.
-     * Parses JSON and handles HTTP errors, returning the raw response body.
+     * Execute an HTTP request and return its parsed response body without
+     * interpreting it as a WuzAPI response envelope.
      */
-    protected requestRaw<T>(method: "GET" | "POST" | "DELETE" | "PUT", endpoint: string, params?: Record<string, string | number | boolean | undefined | null>, data?: unknown, options?: RequestOptions): Promise<T>;
+    protected requestRaw<T>(method: HttpMethod, endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
     /**
-     * High-level WuzAPI request wrapper.
-     * Calls requestRaw and unwraps the WuzAPI `.data` envelope.
+     * Execute a WuzAPI request, validate its response envelope, and unwrap
+     * its `.data` value.
      */
-    protected request<T>(method: "GET" | "POST" | "DELETE" | "PUT", endpoint: string, params?: Record<string, string | number | boolean | undefined | null>, data?: unknown, options?: RequestOptions): Promise<T>;
-    protected get<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined | null>, options?: RequestOptions): Promise<T>;
-    protected getRaw<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined | null>, options?: RequestOptions): Promise<T>;
+    protected request<T>(method: HttpMethod, endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
+    protected get<T>(endpoint: string, options?: RequestOptions): Promise<T>;
     protected post<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
     protected put<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;
     protected delete<T>(endpoint: string, options?: RequestOptions): Promise<T>;
 }
+export {};
