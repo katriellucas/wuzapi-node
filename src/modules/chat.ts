@@ -3,6 +3,7 @@ import { RequestOptions } from "../types/common.js";
 import {
   SendMessageResponse,
   SendTextRequest,
+  SendPixRequest,
   SendTemplateRequest,
   SendAudioRequest,
   SendImageRequest,
@@ -42,6 +43,16 @@ export class ChatModule extends BaseClient {
     options?: RequestOptions
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/send/text", request, options);
+  }
+
+  /**
+   * Send a Pix payment request
+   */
+  async sendPix(
+    request: SendPixRequest,
+    options?: RequestOptions
+  ): Promise<SendMessageResponse> {
+    return this.post<SendMessageResponse>("/chat/send/pix", request, options);
   }
 
   /**

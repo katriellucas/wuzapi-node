@@ -30,6 +30,14 @@ export interface SendTextRequest {
   QuotedMessage?: QuotedMessagePreview;
 }
 
+export interface SendPixRequest {
+  Phone: string;
+  MerchantName: string;
+  PixKey: string;
+  PixKeyType?: "PHONE" | "CPF" | "CNPJ" | "EMAIL" | "EVP";
+  Id?: string;
+}
+
 export interface TemplateButton {
   DisplayText: string;
   Id?: string;
