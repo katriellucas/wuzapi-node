@@ -10,7 +10,7 @@ Consequence: the value of a change is almost entirely in *type fidelity to the s
 
 ## Commands
 
-Package manager is **bun** (`packageManager: bun@1.3.8`). Use `bun run`, not `npm run`.
+Package manager is **bun** (`packageManager: bun@1.4.2`). Use `bun run`, not `npm run`.
 
 ```bash
 bun install
