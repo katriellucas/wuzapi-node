@@ -1,0 +1,53 @@
+import { BaseClient } from '../client.js';
+import { RequestOptions } from '../types/common.js';
+import { UserInfoResponse, UserCheckResponse, UserAvatarResponse, ContactsResponse, UserPresenceResponse, SubscribePresenceResponse, UserLidResponse, UserPrivacySettings, PrivacySettingValueMap, UserBlockRequest, UserBlockResponse, UserUnblockResponse, UserBlocklistResponse } from '../types/user.js';
+export declare class UserModule extends BaseClient {
+    /**
+     * Get user details for specified phone numbers
+     */
+    getInfo(phones: string[], options?: RequestOptions): Promise<UserInfoResponse>;
+    /**
+     * Check if phone numbers are registered WhatsApp users
+     */
+    check(phones: string[], options?: RequestOptions): Promise<UserCheckResponse>;
+    /**
+     * Get user avatar/profile picture
+     */
+    getAvatar(phone: string, preview?: boolean, options?: RequestOptions): Promise<UserAvatarResponse>;
+    /**
+     * Get all contacts
+     */
+    getContacts(options?: RequestOptions): Promise<ContactsResponse>;
+    /**
+     * Send user presence (available/unavailable status)
+     */
+    sendPresence(presenceType: "available" | "unavailable", options?: RequestOptions): Promise<UserPresenceResponse>;
+    /**
+     * Subscribe to a contact's presence updates. Delivered via `Presence` webhooks.
+     */
+    subscribePresence(phone: string, options?: RequestOptions): Promise<SubscribePresenceResponse>;
+    /**
+     * Get LID (Linked ID) from phone number or JID
+     */
+    getLid(phone: string, options?: RequestOptions): Promise<UserLidResponse>;
+    /**
+     * Get user privacy settings
+     */
+    getPrivacy(options?: RequestOptions): Promise<UserPrivacySettings>;
+    /**
+     * Set a user privacy setting
+     */
+    setPrivacy<K extends keyof PrivacySettingValueMap>(name: K, value: PrivacySettingValueMap[K], options?: RequestOptions): Promise<Partial<UserPrivacySettings>>;
+    /**
+     * Block a WhatsApp user
+     */
+    blockUser(request: UserBlockRequest, options?: RequestOptions): Promise<UserBlockResponse>;
+    /**
+     * Unblock a WhatsApp user
+     */
+    unblockUser(request: UserBlockRequest, options?: RequestOptions): Promise<UserUnblockResponse>;
+    /**
+     * Get the current blocklist
+     */
+    getBlocklist(options?: RequestOptions): Promise<UserBlocklistResponse>;
+}
