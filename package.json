@@ -1,62 +1,63 @@
 {
-  "name": "wuzapi",
-  "version": "1.11.0",
-  "packageManager": "bun@1.4.2",
-  "description": "TypeScript client library for WuzAPI WhatsApp API",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
-    "prebuild": "bun run clean",
-    "prepublishOnly": "bun run lint && bun run typecheck && bun run test && bun run build",
-    "release:patch": "bun pm version patch && bun publish",
-    "release:minor": "bun pm version minor && bun publish",
-    "release:major": "bun pm version major && bun publish",
-    "release": "bun publish",
-    "test": "bun check_response_handling.ts"
-  },
-  "keywords": [
-    "whatsapp",
-    "api",
-    "client",
-    "typescript",
-    "wuzapi"
-  ],
-  "author": "Gus",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gusnips/wuzapi-node.git"
-  },
-  "devDependencies": {
-    "@types/debug": "^4.1.13",
-    "@types/node": "^24.13.4",
-    "@typescript-eslint/eslint-plugin": "^8.70.0",
-    "@typescript-eslint/parser": "^8.70.0",
-    "eslint": "^10.10.0",
-    "typescript": "^6.0.3",
-    "vite": "^8.3.0",
-    "vite-plugin-dts": "^5.1.0"
-  },
-  "dependencies": {
-    "axios": "^1.20.0",
-    "debug": "^4.4.3"
-  }
+	"name": "wuzapi",
+	"version": "1.11.0",
+	"packageManager": "bun@1.4.2",
+	"description": "TypeScript client library for WuzAPI WhatsApp API",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"prepare": "bun run build",
+		"preview": "vite preview",
+		"lint": "eslint src --ext .ts,.tsx",
+		"lint:fix": "eslint src --ext .ts,.tsx --fix",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist",
+		"prebuild": "bun run clean",
+		"prepublishOnly": "bun run lint && bun run typecheck && bun run test && bun run build",
+		"release:patch": "bun pm version patch && bun publish",
+		"release:minor": "bun pm version minor && bun publish",
+		"release:major": "bun pm version major && bun publish",
+		"release": "bun publish",
+		"test": "bun check_response_handling.ts"
+	},
+	"keywords": [
+		"whatsapp",
+		"api",
+		"client",
+		"typescript",
+		"wuzapi"
+	],
+	"author": "Gus",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/gusnips/wuzapi-node.git"
+	},
+	"devDependencies": {
+		"@types/debug": "^4.1.13",
+		"@types/node": "^24.13.4",
+		"@typescript-eslint/eslint-plugin": "^8.70.0",
+		"@typescript-eslint/parser": "^8.70.0",
+		"eslint": "^10.10.0",
+		"typescript": "^6.0.3",
+		"vite": "^8.3.0",
+		"vite-plugin-dts": "^5.1.0"
+	},
+	"dependencies": {
+		"axios": "^1.20.0",
+		"debug": "^4.4.3"
+	}
 }
