@@ -38,6 +38,48 @@ export interface SendPixRequest {
   Id?: string;
 }
 
+export type SendCTAButton =
+  | {
+      Type: "cta_url";
+      DisplayText: string;
+      Url: string;
+    }
+  | {
+      Type: "cta_call";
+      DisplayText: string;
+      PhoneNumber: string;
+    }
+  | {
+      Type: "cta_copy";
+      DisplayText: string;
+      CopyCode: string;
+    }
+  | {
+      Type: "quick_reply";
+      DisplayText: string;
+      Id?: string;
+    };
+
+export interface SendCTARequest {
+  Phone: string;
+  /**
+   * Preferred header field. Takes precedence over `Header` when both are set.
+   */
+  Title?: string;
+  /**
+   * Legacy alias for `Title`.
+   */
+  Header?: string;
+  Body: string;
+  Footer?: string;
+  /**
+   * WhatsApp currently allows 1–3 buttons.
+   * Quick replies cannot be mixed with URL/call/copy buttons.
+   */
+  Buttons: SendCTAButton[];
+  Id?: string;
+}
+
 export interface TemplateButton {
   DisplayText: string;
   Id?: string;
