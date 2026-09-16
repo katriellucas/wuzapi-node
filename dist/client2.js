@@ -591,7 +591,8 @@ var BaseClient = class {
 		this.config = config;
 		this.axios = axios.default.create({
 			baseURL: config.apiUrl,
-			headers: this.defaultHeaders
+			headers: this.defaultHeaders,
+			adapter: "fetch"
 		});
 		this.axios.interceptors.response.use((response) => response, (error) => {
 			if (error.response) {

@@ -48,6 +48,7 @@ export class BaseClient {
     this.axios = axios.create({
       baseURL: config.apiUrl,
       headers: this.defaultHeaders,
+      adapter: 'fetch'
     });
 
     // Add response interceptor for error handling
