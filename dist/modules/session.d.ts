@@ -16,11 +16,22 @@ export declare class SessionModule extends BaseClient {
      */
     logout(options?: RequestOptions): Promise<LogoutResponse>;
     /**
-     * Get session status
+     * Get session status.
+     *
+     * `connected: false, loggedIn: false` comes both after a network drop and
+     * after a logout. To tell them apart, use {@link getQRCode}.
      */
     getStatus(options?: RequestOptions): Promise<StatusResponse>;
     /**
-     * Get QR code for scanning
+     * Get the QR code to scan while pairing.
+     *
+     * It only reads, so it is also the way to learn the session's state: it
+     * throws a `WuzapiError` (code 500) whose `message` says why there's no QR.
+     * - `"no session"`: the server has no session for this user. It logged out,
+     *   the QR expired, or you called `disconnect()` / `logout()`.
+     * - `"not connected"`: the session is there but offline. The server
+     *   reconnects it by itself.
+     * - `"already logged in"`: connected and paired.
      */
     getQRCode(options?: RequestOptions): Promise<QRCodeResponse>;
     /**

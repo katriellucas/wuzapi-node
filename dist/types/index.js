@@ -352,22 +352,32 @@ var UnavailableType = /* @__PURE__ */ function(UnavailableType) {
 	UnavailableType["VIEW_ONCE"] = "view_once";
 	return UnavailableType;
 }({});
+/**
+* The code WhatsApp gives when it refuses a connection or ends a session
+* (whatsmeow's `ConnectFailureReason`). `ConnectFailure` and `LoggedOut` carry
+* it as `Reason`. After 401, 403 or 406 the number has to pair again.
+*/
 var ConnectFailureReason = /* @__PURE__ */ function(ConnectFailureReason) {
-	ConnectFailureReason[ConnectFailureReason["SOCKET_OPEN_TIMEOUT"] = 4001] = "SOCKET_OPEN_TIMEOUT";
-	ConnectFailureReason[ConnectFailureReason["SOCKET_PING_TIMEOUT"] = 4002] = "SOCKET_PING_TIMEOUT";
-	ConnectFailureReason[ConnectFailureReason["SOCKET_PONG_TIMEOUT"] = 4003] = "SOCKET_PONG_TIMEOUT";
-	ConnectFailureReason[ConnectFailureReason["UNKNOWN_LOGOUT"] = 4004] = "UNKNOWN_LOGOUT";
-	ConnectFailureReason[ConnectFailureReason["BAD_MAC"] = 4005] = "BAD_MAC";
-	ConnectFailureReason[ConnectFailureReason["INIT_TIMEOUT"] = 4006] = "INIT_TIMEOUT";
-	ConnectFailureReason[ConnectFailureReason["MULTI_DEVICE_MISMATCH"] = 4007] = "MULTI_DEVICE_MISMATCH";
-	ConnectFailureReason[ConnectFailureReason["MULTI_DEVICE_DISABLED"] = 4008] = "MULTI_DEVICE_DISABLED";
-	ConnectFailureReason[ConnectFailureReason["TEMP_BANNED"] = 4009] = "TEMP_BANNED";
-	ConnectFailureReason[ConnectFailureReason["CLIENT_OUTDATED"] = 4010] = "CLIENT_OUTDATED";
-	ConnectFailureReason[ConnectFailureReason["STREAM_ERROR"] = 4011] = "STREAM_ERROR";
-	ConnectFailureReason[ConnectFailureReason["DEVICE_GONE"] = 4012] = "DEVICE_GONE";
-	ConnectFailureReason[ConnectFailureReason["IDENTITY_MISSING"] = 4013] = "IDENTITY_MISSING";
-	ConnectFailureReason[ConnectFailureReason["RATE_LIMIT_HIT"] = 4014] = "RATE_LIMIT_HIT";
-	ConnectFailureReason[ConnectFailureReason["MAIN_DEVICE_GONE"] = 4015] = "MAIN_DEVICE_GONE";
+	ConnectFailureReason[ConnectFailureReason["GENERIC"] = 400] = "GENERIC";
+	/** The device was removed: from the phone, or by WhatsApp. */
+	ConnectFailureReason[ConnectFailureReason["LOGGED_OUT"] = 401] = "LOGGED_OUT";
+	ConnectFailureReason[ConnectFailureReason["TEMP_BANNED"] = 402] = "TEMP_BANNED";
+	/**
+	* WhatsApp Web calls this LOCKED. It comes when WhatsApp restricts the
+	* number, and also when its owner switches phones.
+	*/
+	ConnectFailureReason[ConnectFailureReason["MAIN_DEVICE_GONE"] = 403] = "MAIN_DEVICE_GONE";
+	ConnectFailureReason[ConnectFailureReason["CLIENT_OUTDATED"] = 405] = "CLIENT_OUTDATED";
+	/** WhatsApp Web calls this BANNED. */
+	ConnectFailureReason[ConnectFailureReason["UNKNOWN_LOGOUT"] = 406] = "UNKNOWN_LOGOUT";
+	ConnectFailureReason[ConnectFailureReason["BAD_USER_AGENT"] = 409] = "BAD_USER_AGENT";
+	ConnectFailureReason[ConnectFailureReason["CAT_EXPIRED"] = 413] = "CAT_EXPIRED";
+	ConnectFailureReason[ConnectFailureReason["CAT_INVALID"] = 414] = "CAT_INVALID";
+	ConnectFailureReason[ConnectFailureReason["NOT_FOUND"] = 415] = "NOT_FOUND";
+	ConnectFailureReason[ConnectFailureReason["CLIENT_UNKNOWN"] = 418] = "CLIENT_UNKNOWN";
+	ConnectFailureReason[ConnectFailureReason["INTERNAL_SERVER_ERROR"] = 500] = "INTERNAL_SERVER_ERROR";
+	ConnectFailureReason[ConnectFailureReason["EXPERIMENTAL"] = 501] = "EXPERIMENTAL";
+	ConnectFailureReason[ConnectFailureReason["SERVICE_UNAVAILABLE"] = 503] = "SERVICE_UNAVAILABLE";
 	return ConnectFailureReason;
 }({});
 var TempBanReason = /* @__PURE__ */ function(TempBanReason) {
