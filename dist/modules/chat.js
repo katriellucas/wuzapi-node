@@ -15,12 +15,6 @@ var ChatModule = class extends require_client.BaseClient {
 		return this.post("/chat/send/pix", request, options);
 	}
 	/**
-	* Send an interactive CTA or quick-reply message
-	*/
-	async sendCTA(request, options) {
-		return this.post("/chat/send/cta", request, options);
-	}
-	/**
 	* Send a template message with buttons
 	*/
 	async sendTemplate(request, options) {

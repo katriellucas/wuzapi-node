@@ -1,6 +1,6 @@
 import { BaseClient } from '../client.js';
 import { RequestOptions } from '../types/common.js';
-import { SendMessageResponse, SendTextRequest, SendPixRequest, SendCTARequest, SendTemplateRequest, SendAudioRequest, SendImageRequest, SendDocumentRequest, SendVideoRequest, SendStickerRequest, SendLocationRequest, SendContactRequest, ChatPresenceRequest, MarkReadRequest, MarkReadResponse, ReactRequest, PinMessageRequest, PinMessageResponse, DownloadMediaRequest, DownloadMediaResponse, DeleteMessageResponse, SendButtonsRequest, ListSection, GetChatHistoryResponse, RequestUnavailableMessageResponse, ArchiveChatResponse } from '../types/chat.js';
+import { SendMessageResponse, SendTextRequest, SendPixRequest, SendTemplateRequest, SendAudioRequest, SendImageRequest, SendDocumentRequest, SendVideoRequest, SendStickerRequest, SendLocationRequest, SendContactRequest, ChatPresenceRequest, MarkReadRequest, MarkReadResponse, ReactRequest, PinMessageRequest, PinMessageResponse, DownloadMediaRequest, DownloadMediaResponse, DeleteMessageResponse, SendButtonsRequest, ListSection, GetChatHistoryResponse, RequestUnavailableMessageResponse, ArchiveChatResponse } from '../types/chat.js';
 export declare class ChatModule extends BaseClient {
     /**
      * Send a text message
@@ -10,10 +10,6 @@ export declare class ChatModule extends BaseClient {
      * Send a Pix payment request
      */
     sendPix(request: SendPixRequest, options?: RequestOptions): Promise<SendMessageResponse>;
-    /**
-     * Send an interactive CTA or quick-reply message
-     */
-    sendCTA(request: SendCTARequest, options?: RequestOptions): Promise<SendMessageResponse>;
     /**
      * Send a template message with buttons
      */

@@ -4,7 +4,6 @@ import {
   SendMessageResponse,
   SendTextRequest,
   SendPixRequest,
-  SendCTARequest,
   SendTemplateRequest,
   SendAudioRequest,
   SendImageRequest,
@@ -54,16 +53,6 @@ export class ChatModule extends BaseClient {
     options?: RequestOptions
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/send/pix", request, options);
-  }
-
-  /**
-   * Send an interactive CTA or quick-reply message
-   */
-  async sendCTA(
-    request: SendCTARequest,
-    options?: RequestOptions
-  ): Promise<SendMessageResponse> {
-    return this.post<SendMessageResponse>("/chat/send/cta", request, options);
   }
 
   /**
