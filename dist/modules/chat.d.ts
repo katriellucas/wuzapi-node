@@ -76,8 +76,8 @@ export declare class ChatModule extends BaseClient {
      */
     downloadDocument(request: DownloadMediaRequest, options?: RequestOptions): Promise<DownloadMediaResponse>;
     /**
-     * Delete (revoke for everyone) a message you sent.
-     * Phone is the chat JID/number the message belongs to — required by the server.
+     * Delete (revoke for everyone) a message you sent. Phone is the chat JID/number the message
+     * belongs to. The server requires it.
      */
     deleteMessage(messageId: string, phone: string, options?: RequestOptions): Promise<DeleteMessageResponse>;
     /**

@@ -603,10 +603,9 @@ var BaseClient = class {
 		});
 	}
 	/**
-	* Build the auth header the endpoint requires. WuzAPI reads `token` on user
-	* routes and `Authorization` on `/admin/*`, and never falls back from one to
-	* the other — so the header is fixed by the module's scheme, and
-	* `options.token` only overrides which credential goes in it.
+	* Build the auth header the endpoint requires. WuzAPI reads `token` on user routes and
+	* `Authorization` on `/admin/*`, and never falls back from one to the other. The header is fixed
+	* by the module's scheme, and `options.token` only overrides which credential goes in it.
 	*/
 	buildHeaders(options) {
 		const isAdmin = this.authScheme === "admin";

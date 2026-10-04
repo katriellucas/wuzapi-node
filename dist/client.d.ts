@@ -16,10 +16,9 @@ export declare class BaseClient {
     protected readonly authScheme: "user" | "admin";
     constructor(config: WuzapiConfig);
     /**
-     * Build the auth header the endpoint requires. WuzAPI reads `token` on user
-     * routes and `Authorization` on `/admin/*`, and never falls back from one to
-     * the other — so the header is fixed by the module's scheme, and
-     * `options.token` only overrides which credential goes in it.
+     * Build the auth header the endpoint requires. WuzAPI reads `token` on user routes and
+     * `Authorization` on `/admin/*`, and never falls back from one to the other. The header is fixed
+     * by the module's scheme, and `options.token` only overrides which credential goes in it.
      */
     private buildHeaders;
     protected request<T>(method: "GET" | "POST" | "DELETE" | "PUT", endpoint: string, data?: unknown, options?: RequestOptions): Promise<T>;

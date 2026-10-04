@@ -57,8 +57,8 @@ export declare const WEBHOOK_EVENTS: WebhookEventType[];
 export type WebhookEvent = keyof typeof WebhookEventType;
 export interface SetWebhookRequest {
     /**
-     * Webhook URL. Decoded from the `webhookurl` key by current WuzAPI
-     * servers — older servers read `webhook`.
+     * Webhook URL. Decoded from the `webhookurl` key by current WuzAPI servers. Older servers read
+     * `webhook`.
      */
     webhookurl: string;
     events: (WebhookEvent | string)[];

@@ -112,8 +112,8 @@ var ChatModule = class extends require_client.BaseClient {
 		return this.post("/chat/downloaddocument", request, options);
 	}
 	/**
-	* Delete (revoke for everyone) a message you sent.
-	* Phone is the chat JID/number the message belongs to — required by the server.
+	* Delete (revoke for everyone) a message you sent. Phone is the chat JID/number the message
+	* belongs to. The server requires it.
 	*/
 	async deleteMessage(messageId, phone, options) {
 		const request = {
