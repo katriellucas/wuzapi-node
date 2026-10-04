@@ -35,8 +35,10 @@ export interface SendPixRequest {
   MerchantName: string;
   PixKey: string;
   PixKeyType?: "PHONE" | "CPF" | "CNPJ" | "EMAIL" | "EVP";
+  Amount?: number;
   Id?: string;
 }
+
 export interface TemplateButton {
   DisplayText: string;
   Id?: string;
