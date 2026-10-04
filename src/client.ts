@@ -61,7 +61,7 @@ export class BaseClient {
           throw new WuzapiError(
             body?.code || error.response.status,
             resolveErrorMessage(body, error.message),
-            body
+            body,
           );
         } else if (error.request) {
           // Request was made but no response received
@@ -70,15 +70,14 @@ export class BaseClient {
           // Something else happened
           throw new WuzapiError(0, error.message);
         }
-      }
+      },
     );
   }
 
   /**
-   * Build the auth header the endpoint requires. WuzAPI reads `token` on user
-   * routes and `Authorization` on `/admin/*`, and never falls back from one to
-   * the other — so the header is fixed by the module's scheme, and
-   * `options.token` only overrides which credential goes in it.
+   * Build the auth header the endpoint requires. WuzAPI reads `token` on user routes and
+   * `Authorization` on `/admin/*`, and never falls back from one to the other. The header is fixed
+   * by the module's scheme, and `options.token` only overrides which credential goes in it.
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
     const isAdmin = this.authScheme === "admin";
@@ -90,7 +89,7 @@ export class BaseClient {
         401,
         isAdmin
           ? "No admin token provided. Set `adminToken` in the client config, or pass `{ token }` in the request options."
-          : "No user token provided. Set `token` in the client config, or pass `{ token }` in the request options."
+          : "No user token provided. Set `token` in the client config, or pass `{ token }` in the request options.",
       );
     }
 
@@ -104,7 +103,7 @@ export class BaseClient {
     method: "GET" | "POST" | "DELETE" | "PUT",
     endpoint: string,
     data?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     const headers = this.buildHeaders(options);
     if (this.config.debug) {
@@ -132,7 +131,7 @@ export class BaseClient {
       throw new WuzapiError(
         code,
         resolveErrorMessage(response.data, "API request failed"),
-        response.data
+        response.data,
       );
     }
 
@@ -141,7 +140,7 @@ export class BaseClient {
 
   protected async get<T>(
     endpoint: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("GET", endpoint, undefined, options);
   }
@@ -149,7 +148,7 @@ export class BaseClient {
   protected async post<T>(
     endpoint: string,
     data?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("POST", endpoint, data, options);
   }
@@ -157,14 +156,14 @@ export class BaseClient {
   protected async put<T>(
     endpoint: string,
     data?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("PUT", endpoint, data, options);
   }
 
   protected async delete<T>(
     endpoint: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("DELETE", endpoint, undefined, options);
   }
