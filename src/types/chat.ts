@@ -189,22 +189,38 @@ export interface DeleteMessageResponse {
   Details: string;
 }
 
+
 /**
- * One button of a SendButtons message. WhatsApp caps button titles at 20 characters; the server
- * truncates longer titles. The server also honors legacy alias fields (`text`, `buttonText`,
- * `buttonId`). Prefer the canonical ones here.
+ * Reply button for a SendButtons message.
  */
-export type SendButton =
-  | { type?: "reply"; title: string; id?: string }
+export type ReplyButton = {
+  type: "reply";
+  title: string;
+  id: string;
+};
+
+/**
+ * Call-to-action button for a SendButtons message.
+ */
+export type CTAButton =
   | { type: "cta_url"; title: string; url: string }
   | { type: "cta_call"; title: string; phone_number: string }
   | { type: "copy"; title: string; copy_code: string };
 
+export type SendButton = ReplyButton | CTAButton;
+
+/**
+ * Send a message containing 1 to 3 buttons.
+ * Reply and CTA buttons cannot be mixed in the same message.
+ * WhatsApp limits button titles to 20 characters.
+ */
 export interface SendButtonsRequest {
   Phone: string;
   /** Main body text. */
   Body: string;
-  Buttons: SendButton[];
+  Buttons:
+    | [ReplyButton, ReplyButton?, ReplyButton?]
+    | [CTAButton, CTAButton?, CTAButton?];
   Title?: string;
   Text?: string;
   Footer?: string;
